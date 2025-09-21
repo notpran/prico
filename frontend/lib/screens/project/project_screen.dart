@@ -33,3 +33,23 @@ class _ProjectScreenState extends State<ProjectScreen> {
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                Project project = snapshot.data![index];
+                return ListTile(
+                  title: Text(project.name),
+                  subtitle: Text(project.description ?? ''),
+                );
+              },
+            );
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to a screen to create a new project
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}

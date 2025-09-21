@@ -13,6 +13,12 @@ async def create_project(
 ):
     return await crud.project.create_project(project=project_in, owner_id=current_user.id)
 
+@router.get("/", response_model=list[schemas.Project])
+async def get_projects(
+    current_user: User = Depends(deps.get_current_user),
+):
+    return await crud.project.get_projects_by_owner(owner_id=current_user.id)
+
 @router.get("/{project_id}", response_model=schemas.Project)
 async def get_project(
     project_id: str,

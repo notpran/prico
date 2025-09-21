@@ -10,6 +10,9 @@ async def create_project(project: ProjectCreate, owner_id: str):
 async def get_project(project_id: str):
     return await database.projects.find_one({"_id": project_id})
 
+async def get_projects_by_owner(owner_id: str):
+    return await database.projects.find({"owner_id": owner_id}).to_list(100)
+
 async def create_repo_file(file: RepoFileCreate, project_id: str):
     db_file = RepoFile(**file.dict(), project_id=project_id)
     await database.repo_files.insert_one(db_file.dict(by_alias=True))
