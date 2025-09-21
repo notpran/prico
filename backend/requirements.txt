@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-socketio
+motor
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+python-multipart
