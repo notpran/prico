@@ -3,7 +3,6 @@ from .all import *
 __all__ = [
     "User",
     "UserCreate",
-    "UserLogin", 
     "Token",
     "Message",
     "MessageCreate",

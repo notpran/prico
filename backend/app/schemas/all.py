@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import List, Optional
+from typing import List, Optional, Any, Annotated
 from bson import ObjectId
 
 class PyObjectId(ObjectId):
@@ -14,8 +14,8 @@ class PyObjectId(ObjectId):
         return ObjectId(v)
 
     @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+    def __get_pydantic_json_schema__(cls, _schema_generator, _field_schema) -> None:
+        _field_schema.update(type="string")
 
 class UserBase(BaseModel):
     email: EmailStr = Field(..., unique=True)
@@ -30,11 +30,12 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
 
 class UserInDBBase(UserBase):
+    
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
     class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
+        from_attributes = True
+        validate_by_name = True
         json_encoders = {ObjectId: str}
 
 class User(UserInDBBase):

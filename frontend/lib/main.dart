@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:prico/screens/landing_screen.dart';
+import 'package:prico/screens/landing_screen_simple.dart';
 import 'package:prico/providers/theme_provider.dart';
 
 void main() {

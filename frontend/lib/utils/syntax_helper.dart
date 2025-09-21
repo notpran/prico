@@ -6,41 +6,40 @@ class SyntaxHelper {
   static Syntax getSyntaxFromName(String language) {
     switch (language.toLowerCase()) {
       case 'dart':
-        return Syntax.dart;
+        return Syntax.DART;
       case 'javascript':
       case 'typescript':
       case 'js':
       case 'ts':
-        return Syntax.javascript;
+        return Syntax.JAVASCRIPT;
       case 'python':
       case 'py':
-        return Syntax.javascript; // Fallback since python isn't available
+        return Syntax.JAVASCRIPT; // Fallback since python isn't available
       case 'java':
-        return Syntax.java;
+        return Syntax.JAVA;
       case 'cpp':
       case 'c':
       case 'c++':
-        return Syntax.cpp;
+        return Syntax.CPP;
       case 'html':
       case 'xml':
       case 'svg':
-        return Syntax.javascript; // Fallback since xml isn't available
+        return Syntax.JAVASCRIPT; // Fallback since xml isn't available
       case 'css':
-        return Syntax.javascript; // Fallback since css isn't available
+        return Syntax.JAVASCRIPT; // Fallback since css isn't available
       case 'json':
-        return Syntax.javascript; // Fallback since json isn't available
+        return Syntax.JAVASCRIPT; // Fallback since json isn't available
       case 'yaml':
       case 'yml':
-        return Syntax.yaml;
+        return Syntax.YAML;
       case 'sql':
-        return Syntax.javascript; // Fallback since sql isn't available
+        return Syntax.JAVASCRIPT; // Fallback since sql isn't available
       case 'bash':
       case 'sh':
-        return Syntax.javascript; // Fallback since shell isn't available
+        return Syntax.JAVASCRIPT; // Fallback since shell isn't available
       default:
-        return Syntax.javascript;
+        return Syntax.JAVASCRIPT;
     }
-  }
   }
   
   static String getSyntaxName(String language) {

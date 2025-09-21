@@ -4,9 +4,10 @@ import 'package:prico/models/project.dart';
 import 'package:prico/models/repo_file.dart';
 import 'package:prico/models/pull_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:prico/api/api_config.dart';
 
 class ProjectApi {
-  final String _baseUrl = 'http://localhost:8000/api/v1';
+  final String _baseUrl = ApiConfig.baseUrl;
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();

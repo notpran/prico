@@ -1,23 +1,37 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:prico/api/api_config.dart';
+import 'package:prico/utils/logger.dart';
 
 class AuthApi {
-  final String _baseUrl = 'http://localhost:8000/api/v1';
+  final String _baseUrl = ApiConfig.baseUrl;
 
   Future<bool> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/auth/login/access-token'),
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: {'username': email, 'password': password},
-    );
+    final url = '$_baseUrl/auth/login/access-token';
+    AppLogger.log('Attempting login at: $url');
+    
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {'username': email, 'password': password},
+      );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['access_token']);
-      return true;
-    } else {
+      AppLogger.log('Login response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['access_token']);
+        AppLogger.log('Login successful');
+        return true;
+      } else {
+        AppLogger.error('Login failed with status: ${response.statusCode}', response.body);
+        return false;
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Login exception', e, stackTrace);
       return false;
     }
   }

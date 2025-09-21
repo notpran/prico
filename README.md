@@ -50,7 +50,7 @@ A full-stack collaborative coding app with chat systems and project management c
 
 3. Run the Flutter web app:
    ```bash
-   flutter run -d web-server --web-port 3000
+   flutter run -d web-server --web-hostname=0.0.0.0 --web-port=3000
    ```
 
 4. The Flutter web app will be available at:

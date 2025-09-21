@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:prico/models/message.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:prico/api/api_config.dart';
 
 class ChatApi {
-  final String _baseUrl = 'http://localhost:8000/api/v1';
+  final String _baseUrl = ApiConfig.baseUrl;
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
