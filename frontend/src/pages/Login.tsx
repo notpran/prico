@@ -23,10 +23,15 @@ const Login: React.FC = () => {
         localStorage.setItem('token', response.data.access_token);
         navigate('/home');
       }
-    } catch (err) {
+    // ... existing code ...
+    } catch (err: any) {
       setError('Failed to login. Please check your credentials.');
-      console.error(err);
+      console.error('Login error:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+      }
     }
+// ... existing code ...
   };
 
   return (
