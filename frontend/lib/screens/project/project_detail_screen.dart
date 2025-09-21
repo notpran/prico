@@ -5,6 +5,7 @@ import 'package:prico/models/repo_file.dart';
 import 'package:prico/models/pull_request.dart';
 import 'package:prico/screens/project/file_detail_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 import 'package:prico/widgets/animations.dart';
 
 class ProjectDetailScreen extends StatefulWidget {

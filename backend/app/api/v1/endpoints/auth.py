@@ -46,25 +46,6 @@ async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     OAuth2 compatible token login, get an access token for future requests.
     """
-    user = await get_user_by_email(form_data.username)
-    if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
-    if not verify_password(form_data.password, user["hashed_password"]):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
-    access_token = create_access_token(data={"sub": user["email"]})
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
-
-
-@router.post("/login/access-token")
-async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    """
-    OAuth2 compatible token login, get an access token for future requests.
-    """
     user = await crud_user.get_user_by_email(email=form_data.username)
     if not user or not verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(status_code=400, detail="Incorrect email or password")

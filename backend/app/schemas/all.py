@@ -72,27 +72,3 @@ class PullRequest(BaseModel):
     title: str
     description: str
     status: str = "open"
-    owner_id: str
-    description: str = None
-
-class RepoFileCreate(BaseModel):
-    path: str
-    content: str
-
-class RepoFile(BaseModel):
-    id: str
-    project_id: str
-    path: str
-    content: str
-
-class PullRequestCreate(BaseModel):
-    title: str
-    description: str
-
-class PullRequest(BaseModel):
-    id: str
-    project_id: str
-    author_id: str
-    title: str
-    description: str
-    status: str

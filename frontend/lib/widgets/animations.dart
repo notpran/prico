@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 
 class AnimatedPageTransition extends PageRouteBuilder {
   final Widget page;

@@ -7,7 +7,7 @@ from app.crud import crud_user
 from app.models import User
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login"
+    tokenUrl=f"{settings.API_V1_STR}/auth/login/access-token"
 )
 
 async def get_current_user(token: str = Depends(reusable_oauth2)) -> User:

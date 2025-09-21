@@ -624,14 +624,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           skinToneIndicatorColor: Colors.grey,
           enableSkinTones: true,
           recentsLimit: 28,
-          noRecents: Text(
+          noRecents: const Text(
             'No Recents',
             style: TextStyle(fontSize: 20, color: Colors.black26),
             textAlign: TextAlign.center,
           ),
-          loadingIndicator: SizedBox.shrink(),
+          loadingIndicator: const SizedBox.shrink(),
           tabIndicatorAnimDuration: kTabScrollDuration,
-          categoryIcons: CategoryIcons(),
+          categoryIcons: const CategoryIcons(),
           buttonMode: ButtonMode.MATERIAL,
         ),
       ),

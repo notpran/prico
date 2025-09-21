@@ -10,7 +10,6 @@ class ChatApi {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
-
   Future<List<Message>> getMessages(String roomId) async {
     final token = await _getToken();
     final response = await http.get(

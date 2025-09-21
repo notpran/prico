@@ -15,6 +15,7 @@ import 'package:prico/widgets/perpetual_motion.dart';
 import 'package:prico/widgets/fluid_animations.dart';
 import 'package:prico/providers/theme_provider.dart';
 import 'package:prico/utils/username_id.dart';
+import 'package:prico/widgets/custom_container.dart';
 
 class LandingScreen extends StatefulWidget {
   @override
@@ -105,7 +106,7 @@ class _LandingScreenState extends State<LandingScreen>
               primaryColor: ThemeProvider.getPrimaryGradientStart(context),
               secondaryColor: ThemeProvider.getPrimaryGradientEnd(context),
               elementCount: 12,
-              child: Container(
+              child: CustomCustomContainer(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -146,8 +147,8 @@ class _LandingScreenState extends State<LandingScreen>
                     ),
                     SizedBox(width: 16),
                     // Theme toggle button
-                    FluidAnimationContainer(
-                      child: Container(
+                    FluidAnimationCustomContainer(
+                      child: CustomCustomContainer(
                         decoration: BoxDecoration(
                           color: ThemeProvider.getGlassMorphismColor(context),
                           borderRadius: BorderRadius.circular(25),
@@ -185,25 +186,25 @@ class _LandingScreenState extends State<LandingScreen>
               child: SingleChildScrollView(
                 controller: _scrollController,
                 physics: FluidScrollPhysics(),
-                child: Container(
+                child: CustomCustomContainer(
                   width: double.infinity,
                   child: Column(
                     children: [
                       // Hero section with enhanced 3D effects
-                      Container(
+                      CustomContainer(
                         height: MediaQuery.of(context).size.height,
                         child: _buildEnhancedHeroSection(),
                       ),
                       
                       // Features section with fluid animations
                       if (_showFeatures)
-                        Container(
+                        CustomContainer(
                           height: MediaQuery.of(context).size.height * 0.6,
                           child: _buildEnhancedFeaturesSection(),
                         ),
                       
                       // Call-to-action section with liquid morphing
-                      Container(
+                      CustomContainer(
                         height: MediaQuery.of(context).size.height * 0.4,
                         child: _buildEnhancedCallToActionSection(),
                       ),
@@ -219,7 +220,7 @@ class _LandingScreenState extends State<LandingScreen>
   }
 
   Widget _buildEnhancedHeroSection() {
-    return Container(
+    return CustomCustomContainer(
       width: double.infinity,
       child: Stack(
         alignment: Alignment.center,
@@ -243,10 +244,10 @@ class _LandingScreenState extends State<LandingScreen>
                     builder: (context, child) {
                       return Transform.scale(
                         scale: _pulseAnimation.value,
-                        child: LiquidMorphContainer(
+                        child: LiquidMorphCustomContainer(
                           color: ThemeProvider.getPrimaryGradientStart(context),
                           autoMorph: true,
-                          child: Container(
+                          child: CustomCustomContainer(
                             width: 200,
                             height: 200,
                             decoration: BoxDecoration(
@@ -303,7 +304,7 @@ class _LandingScreenState extends State<LandingScreen>
                   math.cos(index * math.pi / 3) * 150 - 40,
               top: MediaQuery.of(context).size.height * 0.35 +
                   math.sin(index * math.pi / 3) * 100 - 30,
-              child: FluidAnimationContainer(
+              child: FluidAnimationCustomContainer(
                 child: FloatingCard(
                   animationController: _rotationController,
                   delay: index * 0.3,
@@ -322,7 +323,7 @@ class _LandingScreenState extends State<LandingScreen>
             right: 0,
             child: Column(
               children: [
-                FluidAnimationContainer(
+                FluidAnimationCustomContainer(
                   child: Text(
                     "PRICO",
                     style: TextStyle(
@@ -347,7 +348,7 @@ class _LandingScreenState extends State<LandingScreen>
                   ),
                 ),
                 SizedBox(height: 16),
-                FluidAnimationContainer(
+                FluidAnimationCustomContainer(
                   child: Text(
                     "Code. Chat. Collaborate.",
                     style: TextStyle(
@@ -362,7 +363,7 @@ class _LandingScreenState extends State<LandingScreen>
                   ),
                 ),
                 SizedBox(height: 12),
-                FluidAnimationContainer(
+                FluidAnimationCustomContainer(
                   child: Text(
                     "Help friends become programmers — chat, learn, and build together.",
                     style: TextStyle(
@@ -379,8 +380,8 @@ class _LandingScreenState extends State<LandingScreen>
                 ),
                 SizedBox(height: 20),
                 // Enhanced username preview
-                FluidAnimationContainer(
-                  child: Container(
+                FluidAnimationCustomContainer(
+                  child: CustomCustomContainer(
                     width: 300,
                     child: TextField(
                       controller: _heroUsernameController,
@@ -406,7 +407,7 @@ class _LandingScreenState extends State<LandingScreen>
                 Builder(builder: (context) {
                   final text = _heroUsernameController.text;
                   final id = text.isEmpty ? '' : uniqueIdForUsername(text);
-                  return FluidAnimationContainer(
+                  return FluidAnimationCustomContainer(
                     child: Text(
                       id.isEmpty ? '' : 'Generated ID: $id',
                       style: TextStyle(
@@ -424,80 +425,6 @@ class _LandingScreenState extends State<LandingScreen>
       ),
     );
   }
-    return Container(
-      width: double.infinity,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // 3D rotating logo/icon
-          AnimatedBuilder(
-            animation: _rotationController,
-            builder: (context, child) {
-              return Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(_rotationController.value * 2 * math.pi)
-                  ..rotateX(math.sin(_rotationController.value * 2 * math.pi) * 0.3),
-                child: AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _pulseAnimation.value,
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          gradient: RadialGradient(
-                            colors: [
-                              Theme.of(context).primaryColor.withOpacity(0.8),
-                              Theme.of(context).primaryColor.withOpacity(0.3),
-                              Colors.transparent,
-                            ],
-                            stops: [0.3, 0.7, 1.0],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).primaryColor.withOpacity(0.5),
-                              blurRadius: 50,
-                              spreadRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.chat_bubble_outline,
-                            size: 80,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-          
-          // Floating 3D cards around the logo
-          ...List.generate(6, (index) {
-            return Positioned(
-              left: MediaQuery.of(context).size.width * 0.5 +
-                  math.cos(index * math.pi / 3) * 150 - 40,
-              top: MediaQuery.of(context).size.height * 0.35 +
-                  math.sin(index * math.pi / 3) * 100 - 30,
-              child: FloatingCard(
-                animationController: _rotationController,
-                delay: index * 0.3,
-                icon: _getFeatureIcon(index),
-                color: _getFeatureColor(index),
-              ),
-            );
-          }),
-          
-          // Title and subtitle
-          Positioned(
             bottom: 50,
             left: 0,
             right: 0,
@@ -551,7 +478,7 @@ class _LandingScreenState extends State<LandingScreen>
                 ),
                 SizedBox(height: 12),
                 // Small username preview to generate ID
-                Container(
+                CustomContainer(
                   width: 300,
                   child: TextField(
                     controller: _heroUsernameController,
@@ -611,11 +538,11 @@ class _LandingScreenState extends State<LandingScreen>
       },
     ];
 
-    return Container(
+    return CustomCustomContainer(
       padding: EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
-          FluidAnimationContainer(
+          FluidAnimationCustomContainer(
             child: Text(
               "Why Choose Prico?",
               style: TextStyle(
@@ -637,7 +564,7 @@ class _LandingScreenState extends State<LandingScreen>
                 final feature = entry.value;
                 
                 return Expanded(
-                  child: Container(
+                  child: CustomCustomContainer(
                     margin: EdgeInsets.symmetric(horizontal: 8),
                     child: Enhanced3DCard(
                       depth: 15.0,
@@ -647,11 +574,11 @@ class _LandingScreenState extends State<LandingScreen>
                         HapticFeedback.lightImpact();
                         // Handle feature interaction
                       },
-                      child: LiquidMorphContainer(
+                      child: LiquidMorphCustomContainer(
                         color: (feature['color'] as Color).withOpacity(0.1),
                         borderRadius: 20,
                         autoMorph: false,
-                        child: GlassmorphicContainer(
+                        child: GlassmorphicCustomContainer(
                           width: double.infinity,
                           height: 180,
                           borderRadius: 20,
@@ -679,8 +606,8 @@ class _LandingScreenState extends State<LandingScreen>
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                FluidAnimationContainer(
-                                  child: Container(
+                                FluidAnimationCustomContainer(
+                                  child: CustomCustomContainer(
                                     decoration: BoxDecoration(
                                       color: (feature['color'] as Color).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
@@ -753,7 +680,7 @@ class _LandingScreenState extends State<LandingScreen>
       },
     ];
 
-    return Container(
+    return CustomCustomContainer(
       padding: EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
@@ -775,9 +702,9 @@ class _LandingScreenState extends State<LandingScreen>
                 final feature = entry.value;
                 
                 return Expanded(
-                  child: Container(
+                  child: CustomCustomContainer(
                     margin: EdgeInsets.symmetric(horizontal: 8),
-                    child: GlassmorphicContainer(
+                    child: GlassmorphicCustomContainer(
                       width: double.infinity,
                       height: 180,
                       borderRadius: 20,
@@ -849,7 +776,7 @@ class _LandingScreenState extends State<LandingScreen>
   }
 
   Widget _buildEnhancedCallToActionSection() {
-    return Container(
+    return CustomCustomContainer(
       padding: EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -869,12 +796,12 @@ class _LandingScreenState extends State<LandingScreen>
                 ),
               );
             },
-            child: LiquidMorphContainer(
+            child: LiquidMorphCustomContainer(
               color: ThemeProvider.getPrimaryGradientStart(context),
               borderRadius: 30,
               autoMorph: true,
               morphDuration: Duration(seconds: 2),
-              child: Container(
+              child: CustomCustomContainer(
                 width: double.infinity,
                 height: 60,
                 decoration: BoxDecoration(
@@ -920,7 +847,7 @@ class _LandingScreenState extends State<LandingScreen>
             color: Colors.white.withOpacity(0.5),
           ),
           SizedBox(height: 16),
-          FluidAnimationContainer(
+          FluidAnimationCustomContainer(
             child: Text(
               "Join thousands of developers already collaborating",
               style: TextStyle(
@@ -935,7 +862,7 @@ class _LandingScreenState extends State<LandingScreen>
           ),
           SizedBox(height: 20),
           // Infinite scrolling tagline
-          Container(
+          CustomContainer(
             height: 30,
             child: InfiniteScrollingText(
               text: "  •  Revolutionary Chat Experience  •  Advanced Code Collaboration  •  Secure & Private  •  Real-time Sync  ",
@@ -951,12 +878,12 @@ class _LandingScreenState extends State<LandingScreen>
       ),
     );
   }
-    return Container(
+    return CustomCustomContainer(
       padding: EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          CustomContainer(
             width: double.infinity,
             height: 60,
             child: ElevatedButton(

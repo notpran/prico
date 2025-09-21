@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:prico/models/repo_file.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
+import 'package:prico/utils/syntax_helper.dart';
 
 class FileDetailScreen extends StatefulWidget {
   final RepoFile file;
@@ -322,7 +324,6 @@ class _FileDetailScreenState extends State<FileDetailScreen>
                       child: SyntaxView(
                         code: widget.file.content,
                         syntax: _getSyntaxFromLanguage(language),
-                        syntaxTheme: SyntaxTheme.vscodeDark(),
                         fontSize: _fontSize,
                         withZoom: true,
                         withLinesCount: _showLineNumbers,
@@ -368,39 +369,12 @@ class _FileDetailScreenState extends State<FileDetailScreen>
     }
   }
 
+  String _getSyntaxName(String language) {
+    return SyntaxHelper.getSyntaxName(language);
+  }
+  
   Syntax _getSyntaxFromLanguage(String language) {
-    switch (language.toLowerCase()) {
-      case 'dart':
-        return Syntax.dart;
-      case 'javascript':
-        return Syntax.javascript;
-      case 'typescript':
-        return Syntax.javascript; // Use javascript for typescript
-      case 'python':
-        return Syntax.python;
-      case 'java':
-        return Syntax.java;
-      case 'cpp':
-        return Syntax.cpp;
-      case 'c':
-        return Syntax.cpp; // Use cpp for c
-      case 'html':
-        return Syntax.xml; // Use xml for html
-      case 'css':
-        return Syntax.javascript; // Use javascript for css
-      case 'json':
-        return Syntax.javascript; // Use javascript for json
-      case 'xml':
-        return Syntax.xml;
-      case 'yaml':
-        return Syntax.yaml;
-      case 'sql':
-        return Syntax.sql;
-      case 'bash':
-        return Syntax.shell; // Use shell for bash
-      default:
-        return Syntax.text; // Use text for plaintext
-    }
+    return SyntaxHelper.getSyntaxFromName(language);
   }
 
   void _copyToClipboard() {
