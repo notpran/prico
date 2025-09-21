@@ -27,15 +27,18 @@ class AuthApi {
     await prefs.remove('token');
   }
 
-  Future<bool> register(String username, String email, String password) async {
+  Future<bool> register(String username, String email, String password, [String? userId]) async {
+    final payload = {
+      'username': username,
+      'email': email,
+      'password': password,
+    };
+    if (userId != null) payload['user_id'] = userId;
+
     final response = await http.post(
       Uri.parse('$_baseUrl/auth/register'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'username': username,
-        'email': email,
-        'password': password,
-      }),
+      body: json.encode(payload),
     );
     return response.statusCode == 200;
   }

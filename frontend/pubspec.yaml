@@ -33,6 +33,19 @@ dependencies:
   flutter_svg: ^2.0.9
   shimmer: ^3.0.0
   glassmorphism: ^3.0.0
+  # Enhanced UI & Animation Packages
+  flutter_portal: ^1.1.4
+  flutter_hooks: ^0.20.3
+  mouse_follower: ^1.0.2
+  animated_theme_switcher: ^2.0.6
+  particles_flutter: ^0.1.4
+  flutter_carousel_widget: ^2.2.0
+  # 3D and Advanced Graphics
+  model_viewer_plus: ^1.5.1
+  flutter_gl: ^0.0.16
+  # Custom Cursor & Advanced Interactions
+  cursor_interceptor: ^0.1.0
+  visibility_detector: ^0.4.0+2
   # Utilities
   uuid: ^4.1.0
   intl: ^0.18.1
