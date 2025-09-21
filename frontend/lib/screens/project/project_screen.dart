@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:prico/api/project_api.dart';
 import 'package:prico/models/project.dart';
+import 'package:prico/screens/project/project_detail_screen.dart';
+import 'package:prico/screens/project/create_project_screen.dart';
 
 class ProjectScreen extends StatefulWidget {
   @override
@@ -38,6 +40,14 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 return ListTile(
                   title: Text(project.name),
                   subtitle: Text(project.description ?? ''),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProjectDetailScreen(project: project),
+                      ),
+                    );
+                  },
                 );
               },
             );
@@ -45,8 +55,17 @@ class _ProjectScreenState extends State<ProjectScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to a screen to create a new project
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreateProjectScreen()),
+          );
+          if (result == true) {
+            // Refresh the list of projects
+            setState(() {
+              futureProjects = projectApi.getProjects();
+            });
+          }
         },
         child: Icon(Icons.add),
       ),
