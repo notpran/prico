@@ -3,6 +3,7 @@ import 'package:prico/api/project_api.dart';
 import 'package:prico/models/project.dart';
 import 'package:prico/models/repo_file.dart';
 import 'package:prico/models/pull_request.dart';
+import 'package:prico/screens/project/file_detail_screen.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final Project project;
@@ -67,6 +68,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               return ListTile(
                 leading: Icon(Icons.insert_drive_file),
                 title: Text(file.path),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FileDetailScreen(file: file),
+                    ),
+                  );
+                },
               );
             },
           );
