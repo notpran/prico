@@ -1,21 +1,47 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
+from bson import ObjectId
 
-class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
-class User(BaseModel):
-    id: str
-    username: str
-    email: str
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid objectid")
+        return ObjectId(v)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
+class UserBase(BaseModel):
+    email: EmailStr = Field(..., unique=True)
+    username: Optional[str] = None
     is_active: bool = True
-    is_verified: bool = False
+    is_superuser: bool = False
 
-class UserLogin(BaseModel):
-    email: str
+class UserCreate(UserBase):
     password: str
+
+class UserUpdate(UserBase):
+    password: Optional[str] = None
+
+class UserInDBBase(UserBase):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True
+        json_encoders = {ObjectId: str}
+
+class User(UserInDBBase):
+    pass
+
+class UserInDB(UserInDBBase):
+    hashed_password: str
 
 class Token(BaseModel):
     access_token: str
@@ -72,3 +98,4 @@ class PullRequest(BaseModel):
     title: str
     description: str
     status: str = "open"
+
