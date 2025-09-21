@@ -4,6 +4,7 @@ import 'package:prico/api/auth_api.dart';
 import 'package:prico/screens/auth/registration_screen.dart';
 import 'package:prico/screens/home_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 
 class LoginScreen extends StatefulWidget {

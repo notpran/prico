@@ -7,6 +7,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 import 'package:intl/intl.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -622,7 +623,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           skinToneDialogBgColor: Colors.white,
           skinToneIndicatorColor: Colors.grey,
           enableSkinTones: true,
-          showRecentsTab: true,
           recentsLimit: 28,
           noRecents: Text(
             'No Recents',

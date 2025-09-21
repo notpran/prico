@@ -369,37 +369,37 @@ class _FileDetailScreenState extends State<FileDetailScreen>
   }
 
   Syntax _getSyntaxFromLanguage(String language) {
-    switch (language) {
+    switch (language.toLowerCase()) {
       case 'dart':
-        return Syntax.DART;
+        return Syntax.dart;
       case 'javascript':
-        return Syntax.JAVASCRIPT;
+        return Syntax.javascript;
       case 'typescript':
-        return Syntax.TYPESCRIPT;
+        return Syntax.javascript; // Use javascript for typescript
       case 'python':
-        return Syntax.PYTHON;
+        return Syntax.python;
       case 'java':
-        return Syntax.JAVA;
+        return Syntax.java;
       case 'cpp':
-        return Syntax.CPP;
+        return Syntax.cpp;
       case 'c':
-        return Syntax.C;
+        return Syntax.cpp; // Use cpp for c
       case 'html':
-        return Syntax.HTML;
+        return Syntax.xml; // Use xml for html
       case 'css':
-        return Syntax.CSS;
+        return Syntax.javascript; // Use javascript for css
       case 'json':
-        return Syntax.JSON;
+        return Syntax.javascript; // Use javascript for json
       case 'xml':
-        return Syntax.XML;
+        return Syntax.xml;
       case 'yaml':
-        return Syntax.YAML;
+        return Syntax.yaml;
       case 'sql':
-        return Syntax.SQL;
+        return Syntax.sql;
       case 'bash':
-        return Syntax.BASH;
+        return Syntax.shell; // Use shell for bash
       default:
-        return Syntax.PLAINTEXT;
+        return Syntax.text; // Use text for plaintext
     }
   }
 

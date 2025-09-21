@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:prico/screens/chat/chat_screen.dart';
 import 'package:prico/screens/project/project_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:prico/api/auth_api.dart';
 import 'package:prico/screens/auth/login_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 import 'package:glassmorphism/glassmorphism.dart';
 import 'package:prico/widgets/animations.dart';
 import 'package:prico/utils/username_id.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prico/screens/chat/chat_room_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:prico/utils/animation_extensions.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class ChatScreen extends StatefulWidget {

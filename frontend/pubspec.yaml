@@ -44,7 +44,6 @@ dependencies:
   model_viewer_plus: ^1.5.1
   flutter_gl: ^0.0.16
   # Custom Cursor & Advanced Interactions
-  cursor_interceptor: ^0.1.0
   visibility_detector: ^0.4.0+2
   # Utilities
   uuid: ^4.1.0
