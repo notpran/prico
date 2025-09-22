@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Docker from 'dockerode';
 import { Queue, Worker } from 'bullmq';
 import * as fs from 'fs';

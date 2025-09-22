@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "dockerode": "^4.0.0",
-    "bullmq": "^4.0.0"
+    "bullmq": "^4.0.0",
+    "dotenv": "^16.0.0"
   },
   "devDependencies": {
     "@types/dockerode": "^3.3.0",
