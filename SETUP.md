@@ -69,7 +69,7 @@ Copy `.env.example` to `.env` and configure the following variables. **Required*
 # MongoDB Connection String
 # For local development: mongodb://admin:password@localhost:27017/prico
 # For MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/prico
-MONGODB_URI=mongodb://admin:password@localhost:27017/prico
+MONGODB_URI=mongodb://user:password@localhost:27017/prico
 
 # Redis Connection (for caching, sessions, queues)
 REDIS_URL=redis://localhost:6379
