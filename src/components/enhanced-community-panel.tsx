@@ -34,15 +34,16 @@ import {
 import { cn } from '@/lib/utils';
 
 interface Community {
-  id: string;
+  _id?: string; // Convex ID
+  id: string;   // Fallback ID
   name: string;
   description: string;
-  avatar: string;
+  avatar?: string;
   banner?: string;
   memberCount: number;
   isPublic: boolean;
   tags: string[];
-  owner: {
+  owner?: {
     id: string;
     name: string;
     avatar: string;
@@ -93,7 +94,7 @@ export function EnhancedCommunityPanel({
   // Use real Convex data
   const { communities: convexUserCommunities, isLoading: loadingUserCommunities } = useUserCommunities();
   const { communities: convexPublicCommunities, isLoading: loadingPublicCommunities } = usePublicCommunities();
-  const { channels: convexChannels, isLoading: loadingChannels } = useCommunityChannels(selectedCommunityData?.id);
+  const { channels: convexChannels, isLoading: loadingChannels } = useCommunityChannels(selectedCommunityData?._id || selectedCommunityData?.id);
 
   // Use only real Convex data - no fallbacks
   const myCommunities = convexUserCommunities || [];
@@ -148,7 +149,7 @@ export function EnhancedCommunityPanel({
 
   const handleChannelSelect = (channel: Channel) => {
     if (selectedCommunityData) {
-      onSelectChannel(selectedCommunityData.id, channel.id, channel.name);
+      onSelectChannel(selectedCommunityData._id || selectedCommunityData.id, channel.id, channel.name);
     }
   };
 
@@ -282,7 +283,7 @@ export function EnhancedCommunityPanel({
         <div className="flex-1">
           {selectedChannel ? (
             <RealTimeChat
-              communityId={selectedCommunityData.id}
+              communityId={selectedCommunityData?._id || selectedCommunityData?.id || ''}
               channelId={selectedChannel}
               channelName={channels.find((c: Channel) => c.id === selectedChannel)?.name || 'Channel'}
             />

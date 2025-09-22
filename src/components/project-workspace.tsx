@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserProjects } from '@/hooks/use-convex-data';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -30,14 +31,16 @@ interface ProjectWorkspaceProps {
 
 export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProps) {
   const [activeTab, setActiveTab] = useState('overview');
-
-  const projects: any[] = [];
+  
+  // Use real projects data
+  const { projects, isLoading } = useUserProjects();
 
   const pullRequests: any[] = [];
 
   const codeFiles: any[] = [];
 
-  const currentProject = selectedProject || null;
+  // Use the selected project or the first project from the list
+  const currentProject = selectedProject || (projects.length > 0 ? projects[0] : null);
 
   const getFileIcon = (type: string) => {
     switch (type) {
