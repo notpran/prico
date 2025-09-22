@@ -57,7 +57,17 @@ export function PullRequestDemo() {
     }
   };
 
-  const checkStatus = getCheckStatus(currentPR.checks);
+  const checkStatus = currentPR ? getCheckStatus(currentPR.checks) : getCheckStatus('failed');
+
+  if (!currentPR) {
+    return (
+      <Card className="glass-ultra border-blue-500/30 gpu-accelerated ultra-smooth">
+        <CardContent className="p-8 text-center">
+          <p className="text-gray-400">No pull request data available</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card 

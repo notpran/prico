@@ -19,7 +19,8 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 
 interface ProjectWorkspaceProps {
@@ -39,10 +40,18 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
   const currentProject = selectedProject || null;
 
   const getFileIcon = (type: string) => {
-  
-  if (currentProject && !currentProject.lastCommit) {
-    currentProject.lastCommit = '2 hours ago';
-  }
+    switch (type) {
+      case 'tsx':
+      case 'ts':
+        return <FileText className="h-4 w-4 text-blue-400" />;
+      case 'css':
+        return <FileText className="h-4 w-4 text-green-400" />;
+      case 'json':
+        return <FileText className="h-4 w-4 text-yellow-400" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-400" />;
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {

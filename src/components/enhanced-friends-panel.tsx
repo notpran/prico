@@ -30,39 +30,24 @@ export function EnhancedFriendsPanel({ onSelectDM, selectedConversation }: Enhan
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('dms');
 
-    // Friend data - in production this will be loaded from Convex database
+  // Friend data - in production this will be loaded from Convex database
   const friends: any[] = [];
 
   const directMessageConversations: any[] = [];
 
-  const formatLastMessageTime = (timestamp: number) => {
-
-  const directMessageConversations = [
-    {
-      _id: 'dm1',
-      otherUser: friends[0],
-      lastMessage: {
-        content: 'Hey! Want to collaborate on this new project?',
-        createdAt: Date.now() - 300000,
-        senderId: '1'
-      },
-      lastMessageAt: Date.now() - 300000,
-      unreadCount: 2
-    },
-    {
-      _id: 'dm2',
-      otherUser: friends[1],
-      lastMessage: {
-        content: 'The code review looks good, let\'s merge it!',
-        createdAt: Date.now() - 3600000,
-        senderId: '2'
-      },
-      lastMessageAt: Date.now() - 3600000,
-      unreadCount: 0
-    }
-  ];
-
   const pendingRequests: any[] = [];
+
+  const formatLastMessageTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
+    return date.toLocaleDateString();
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -71,6 +56,10 @@ export function EnhancedFriendsPanel({ onSelectDM, selectedConversation }: Enhan
       case 'busy': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
+  };
+
+  const handleStartDM = (conversationId: string, otherUser: any) => {
+    onSelectDM(conversationId, otherUser);
   };
 
   const formatTime = (timestamp: number) => {
@@ -83,10 +72,6 @@ export function EnhancedFriendsPanel({ onSelectDM, selectedConversation }: Enhan
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
     return date.toLocaleDateString();
-  };
-
-  const handleStartDM = (conversationId: string, otherUser: any) => {
-    onSelectDM(conversationId, otherUser);
   };
 
   const handleAcceptRequest = (requestId: string) => {

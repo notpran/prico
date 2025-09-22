@@ -29,6 +29,7 @@ import { FloatingAvatars } from './floating-avatars';
 import { TypingAnimation } from './typing-animation';
 import { GlassmorphismNav } from './glassmorphism-nav';
 import { OptimizedThreeBackground } from './optimized-three-background';
+import { ClientOnly } from './client-only';
 
 interface AdvancedLandingPageProps {
   onGetStarted: () => void;
@@ -63,13 +64,17 @@ export function AdvancedLandingPage({ onGetStarted, onLogin, onDemo }: AdvancedL
       onMouseMove={handleMouseMove}
     >
       {/* Optimized Three.js Background */}
-      <OptimizedThreeBackground mousePosition={mousePosition} />
+      <ClientOnly>
+        <OptimizedThreeBackground mousePosition={mousePosition} />
+      </ClientOnly>
       
       {/* Glassmorphism Navigation */}
       <GlassmorphismNav onLogin={onLogin} />
       
       {/* Floating Avatars */}
-      <FloatingAvatars />
+      <ClientOnly>
+        <FloatingAvatars />
+      </ClientOnly>
       
       {/* Hero Section */}
       <motion.section 
