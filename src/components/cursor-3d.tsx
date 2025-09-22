@@ -11,32 +11,44 @@ export function Cursor3D({ className = '' }: Cursor3DProps) {
   const [trail, setTrail] = useState<Array<{ x: number; y: number; id: number }>>([]);
   const [isVisible, setIsVisible] = useState(false);
   const trailId = useRef(0);
+  const rafRef = useRef<number>();
 
   useEffect(() => {
     let trailTimeout: NodeJS.Timeout;
 
     const handleMouseMove = (e: MouseEvent) => {
       const newPosition = { x: e.clientX, y: e.clientY };
-      setMousePosition(newPosition);
-      setIsVisible(true);
-
-      // Add to trail
-      const newTrailPoint = { 
-        x: newPosition.x, 
-        y: newPosition.y, 
-        id: trailId.current++ 
-      };
       
-      setTrail(prevTrail => {
-        const updatedTrail = [...prevTrail, newTrailPoint];
-        return updatedTrail.slice(-8); // Keep last 8 points
-      });
+      // Use RAF for smooth updates
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        setMousePosition(newPosition);
+        setIsVisible(true);
 
-      // Clear trail after inactivity
-      clearTimeout(trailTimeout);
-      trailTimeout = setTimeout(() => {
-        setTrail([]);
-      }, 100);
+        // Optimized trail with reduced frequency
+        if (trailId.current % 3 === 0) { // Only add every 3rd movement
+          const newTrailPoint = { 
+            x: newPosition.x, 
+            y: newPosition.y, 
+            id: trailId.current++ 
+          };
+          
+          setTrail(prevTrail => {
+            const updatedTrail = [...prevTrail, newTrailPoint];
+            return updatedTrail.slice(-4); // Keep only last 4 points for performance
+          });
+        }
+        trailId.current++;
+
+        // Clear trail after inactivity
+        clearTimeout(trailTimeout);
+        trailTimeout = setTimeout(() => {
+          setTrail([]);
+        }, 150);
+      });
     };
 
     const handleMouseDown = () => setIsClicking(true);
@@ -44,13 +56,14 @@ export function Cursor3D({ className = '' }: Cursor3DProps) {
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
+    // Passive event listeners for better performance
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+    document.addEventListener('mousedown', handleMouseDown, { passive: true });
+    document.addEventListener('mouseup', handleMouseUp, { passive: true });
+    document.addEventListener('mouseleave', handleMouseLeave, { passive: true });
+    document.addEventListener('mouseenter', handleMouseEnter, { passive: true });
 
-    // Hide default cursor
+    // Hardware accelerated cursor hiding
     document.body.style.cursor = 'none';
 
     return () => {
@@ -61,101 +74,67 @@ export function Cursor3D({ className = '' }: Cursor3DProps) {
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.body.style.cursor = 'auto';
       clearTimeout(trailTimeout);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
   }, []);
 
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed top-0 left-0 pointer-events-none z-50 mix-blend-screen ${className}`}>
-      {/* Trail particles */}
-      {trail.map((point, index) => (
+    <div className={`fixed top-0 left-0 pointer-events-none z-50 ${className}`}
+         style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+      {/* Optimized trail particles with hardware acceleration */}
+      {trail.map((point) => (
         <motion.div
           key={point.id}
-          initial={{ opacity: 0.6, scale: 1 }}
-          animate={{ opacity: 0, scale: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="absolute w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-cyan-400"
+          initial={{ opacity: 0.4, scale: 0.8 }}
+          animate={{ opacity: 0, scale: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="absolute w-1 h-1 rounded-full bg-gradient-to-r from-purple-400 to-cyan-400"
           style={{
-            left: point.x - 4,
-            top: point.y - 4,
-            boxShadow: '0 0 10px rgba(157, 78, 221, 0.6)',
+            left: point.x - 2,
+            top: point.y - 2,
+            transform: 'translateZ(0)',
+            willChange: 'transform, opacity',
           }}
         />
       ))}
 
-      {/* Main 3D cursor */}
+      {/* Simplified main cursor with hardware acceleration */}
       <motion.div
-        className="absolute"
+        className="absolute w-4 h-4 border-2 border-purple-400 rounded-full"
         animate={{ 
-          x: mousePosition.x - 12, 
-          y: mousePosition.y - 12,
-          rotate: isClicking ? 45 : 0,
+          x: mousePosition.x - 8, 
+          y: mousePosition.y - 8,
           scale: isClicking ? 1.5 : 1
         }}
         transition={{ 
           type: "spring", 
-          stiffness: 500, 
-          damping: 30,
-          mass: 0.5
+          stiffness: 800, 
+          damping: 35,
+          mass: 0.3
         }}
-      >
-        <motion.div
-          className="w-6 h-6 relative"
-          animate={{
-            rotateY: [0, 360],
-            rotateX: isClicking ? [0, 180] : 0,
-          }}
-          transition={{
-            rotateY: { duration: 2, repeat: Infinity, ease: "linear" },
-            rotateX: { duration: 0.3, ease: "easeInOut" }
-          }}
-          style={{
-            transformStyle: 'preserve-3d',
-            perspective: '1000px'
-          }}
-        >
-          {/* Cube faces */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-sm neon-glow-purple opacity-80"
-               style={{ transform: 'translateZ(3px)' }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-sm neon-glow-cyan opacity-80"
-               style={{ transform: 'rotateY(90deg) translateZ(3px)' }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-sm neon-glow-blue opacity-80"
-               style={{ transform: 'rotateY(180deg) translateZ(3px)' }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-cyan-500 rounded-sm neon-glow-magenta opacity-80"
-               style={{ transform: 'rotateY(-90deg) translateZ(3px)' }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-sm neon-glow-purple opacity-80"
-               style={{ transform: 'rotateX(90deg) translateZ(3px)' }} />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-sm neon-glow-cyan opacity-80"
-               style={{ transform: 'rotateX(-90deg) translateZ(3px)' }} />
-        </motion.div>
-      </motion.div>
+        style={{
+          transform: 'translateZ(0)',
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+        }}
+      />
 
-      {/* Click ripple effect */}
+      {/* Click ripple effect with reduced complexity */}
       {isClicking && (
         <motion.div
-          className="absolute border-2 border-purple-400 rounded-full"
+          className="absolute border border-purple-400 rounded-full"
           style={{
-            left: mousePosition.x - 25,
-            top: mousePosition.y - 25,
-          }}
-          initial={{ width: 0, height: 0, opacity: 0.8 }}
-          animate={{ width: 50, height: 50, opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-      )}
-      
-      {/* Secondary ripple */}
-      {isClicking && (
-        <motion.div
-          className="absolute border border-cyan-400 rounded-full"
-          style={{
-            left: mousePosition.x - 40,
-            top: mousePosition.y - 40,
+            left: mousePosition.x - 20,
+            top: mousePosition.y - 20,
+            transform: 'translateZ(0)',
           }}
           initial={{ width: 0, height: 0, opacity: 0.6 }}
-          animate={{ width: 80, height: 80, opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+          animate={{ width: 40, height: 40, opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         />
       )}
     </div>
