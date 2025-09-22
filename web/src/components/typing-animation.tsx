@@ -62,8 +62,7 @@ export function TypingAnimation() {
             animate={{ opacity: [1, 1, 0, 0] }}
             transition={{ 
               duration: 1.2, 
-              repeat: Infinity,
-              ease: "steps(2, start)"
+              repeat: Infinity
             }}
           />
         </span>
