@@ -1,26 +1,34 @@
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from '@clerk/nextjs';
 
 class SocketManager {
   private socket: Socket | null = null;
 
-  connect() {
+  async connect() {
     if (this.socket) return;
 
-    const { getToken } = useAuth();
-    const token = getToken();
+    try {
+      // Get auth token from cookie (this will be handled server-side)
+      const response = await fetch('/api/auth/me');
+      if (!response.ok) {
+        throw new Error('Not authenticated');
+      }
 
-    this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
-      auth: { token },
-    });
+      const userData = await response.json();
 
-    this.socket.on('connect', () => {
-      console.log('Connected to socket server');
-    });
+      this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
+        auth: { token: 'custom-jwt-token' }, // We'll handle auth differently
+      });
 
-    this.socket.on('disconnect', () => {
-      console.log('Disconnected from socket server');
-    });
+      this.socket.on('connect', () => {
+        console.log('Connected to socket server');
+      });
+
+      this.socket.on('disconnect', () => {
+        console.log('Disconnected from socket server');
+      });
+    } catch (error) {
+      console.error('Failed to connect to socket server:', error);
+    }
   }
 
   disconnect() {

@@ -7,10 +7,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { createClerkClient } from '@clerk/clerk-sdk-node';
+import jwt from 'jsonwebtoken';
 import { connectToDatabase } from '../../web/src/lib/mongo'; // Adjust path
-
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 const app = express();
 const httpServer = createServer(app);
@@ -27,8 +25,13 @@ io.use(async (socket, next) => {
   if (!token) return next(new Error('No token'));
 
   try {
-    const payload = await clerkClient.verifyToken(token);
-    socket.data.userId = payload.sub;
+    // Verify custom JWT token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'fallback-secret'
+    ) as any;
+
+    socket.data.userId = decoded.userId;
     next();
   } catch (err) {
     next(new Error('Invalid token'));

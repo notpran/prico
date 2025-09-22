@@ -1,21 +1,43 @@
 // src/lib/auth-middleware.ts - Authentication middleware for API routes
 
+import jwt from 'jsonwebtoken';
+import { connectToDatabase } from './mongo';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 
-export async function requireAuth(request: NextRequest): Promise<{ userId: string } | NextResponse> {
+export async function getCurrentUser(request: NextRequest) {
   try {
-    const { userId } = auth();
+    const token = request.cookies.get('auth-token')?.value;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!token) {
+      return null;
     }
 
-    return { userId };
+    // Verify token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'fallback-secret'
+    ) as any;
+
+    const db = await connectToDatabase();
+    const users = db.collection('users');
+
+    const user = await users.findOne({ _id: decoded.userId });
+
+    return user;
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
+    console.error('Auth error:', error);
+    return null;
   }
+}
+
+export async function requireAuth(request: NextRequest) {
+  const user = await getCurrentUser(request);
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  return user;
 }
 
 export async function requireAdmin(request: NextRequest): Promise<{ userId: string } | NextResponse> {
