@@ -2,25 +2,32 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
 export default defineSchema({
-  // Users
+  // Users - Enhanced with ownership tracking
   users: defineTable({
-    externalId: v.string(), // Clerk user ID
+    clerkId: v.string(), // Clerk user ID (keeping existing field name)
+    externalId: v.optional(v.string()), // Backup external ID
     email: v.string(),
     displayName: v.string(),
     username: v.string(),
     avatarUrl: v.optional(v.string()),
+    age: v.optional(v.number()),
+    bio: v.optional(v.string()),
+    emailVerified: v.boolean(),
     status: v.union(v.literal('online'), v.literal('away'), v.literal('busy'), v.literal('offline')),
     customStatus: v.optional(v.string()),
-    lastSeen: v.number(),
+    lastSeen: v.optional(v.number()),
+    lastActiveAt: v.number(),
     createdAt: v.number(),
-    bio: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
     location: v.optional(v.string()),
     website: v.optional(v.string()),
     github: v.optional(v.string()),
     twitter: v.optional(v.string()),
     linkedin: v.optional(v.string()),
-    skills: v.array(v.string()),
-    preferences: v.object({
+    skills: v.optional(v.array(v.string())),
+    isActive: v.optional(v.boolean()),
+    role: v.optional(v.union(v.literal('user'), v.literal('admin'), v.literal('moderator'))),
+    preferences: v.optional(v.object({
       theme: v.union(v.literal('light'), v.literal('dark'), v.literal('system')),
       notifications: v.object({
         directMessages: v.boolean(),
@@ -34,11 +41,14 @@ export default defineSchema({
         allowDirectMessages: v.union(v.literal('everyone'), v.literal('friends'), v.literal('none')),
         showProfile: v.union(v.literal('public'), v.literal('friends'), v.literal('private'))
       })
-    })
+    }))
   })
+    .index('by_clerk_id', ['clerkId'])
     .index('by_external_id', ['externalId'])
     .index('by_username', ['username'])
-    .index('by_email', ['email']),
+    .index('by_email', ['email'])
+    .index('by_active', ['isActive'])
+    .index('by_role', ['role']),
 
   // Friendships
   friendships: defineTable({

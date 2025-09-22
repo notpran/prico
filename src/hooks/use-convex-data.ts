@@ -91,7 +91,7 @@ export function useUserCommunities() {
   
   const communities = useQuery(
     api.communities.getUserCommunities,
-    convexUser?._id ? { userId: convexUser._id } : 'skip'
+    convexUser && convexUser.clerkId ? { clerkId: convexUser.clerkId } : 'skip'
   );
 
   return {
@@ -117,6 +117,7 @@ export function usePublicCommunities() {
 
 export function useCommunityChannels(communityId?: string) {
   const { isAuthenticated } = useConvexAuth();
+  const { user } = useUser();
   
   // Check if Convex is configured
   const isConvexConfigured = !!process.env.NEXT_PUBLIC_CONVEX_URL;
@@ -148,7 +149,10 @@ export function useCommunityChannels(communityId?: string) {
   
   const channels = useQuery(
     api.communities.getCommunityChannels,
-    isAuthenticated && communityId ? { communityId } : 'skip'
+    isAuthenticated && communityId && user?.id ? { 
+      communityId,
+      clerkId: user.id 
+    } : 'skip'
   );
 
   return {

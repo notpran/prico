@@ -1,13 +1,68 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
 
-// Get user's projects
+// Helper function to verify project access and ownership
+async function verifyProjectAccess(ctx: any, projectId: string, clerkId: string, requiredRole?: string) {
+  const user = await ctx.db
+    .query('users')
+    .withIndex('by_clerk_id', (q: any) => q.eq('clerkId', clerkId))
+    .first();
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const project = await ctx.db.get(projectId);
+  if (!project) {
+    throw new Error('Project not found');
+  }
+
+  // Check if user is owner
+  if (project.ownerId === user._id) {
+    return { user, project, role: 'owner' };
+  }
+
+  // Check if user is a contributor
+  const contribution = await ctx.db
+    .query('projectContributors')
+    .withIndex('by_project', (q: any) => q.eq('projectId', projectId))
+    .filter((q: any) => q.eq(q.field('userId'), user._id))
+    .first();
+
+  if (!contribution && project.visibility !== 'public') {
+    throw new Error('Access denied: project is private');
+  }
+
+  if (requiredRole && contribution) {
+    const roleHierarchy = ['viewer', 'contributor', 'maintainer', 'admin', 'owner'];
+    const userRoleLevel = roleHierarchy.indexOf(contribution.role);
+    const requiredRoleLevel = roleHierarchy.indexOf(requiredRole);
+    
+    if (userRoleLevel < requiredRoleLevel) {
+      throw new Error(`Access denied: ${requiredRole} role required`);
+    }
+  }
+
+  return { user, project, role: contribution?.role || 'viewer' };
+}
+
+// Get user's projects with proper ownership
 export const getUserProjects = query({
-  args: { userId: v.id('users') },
-  handler: async (ctx, { userId }) => {
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_clerk_id', (q: any) => q.eq('clerkId', args.clerkId))
+      .first();
+
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     // Get projects where user is owner
     const ownedProjects = await ctx.db
       .query('projects')
+<<<<<<< HEAD
       .withIndex('by_owner', (q) => q.eq('owner', userId))
       .collect();
 
@@ -26,6 +81,35 @@ export const getUserProjects = query({
     }
 
     return allProjects;
+=======
+      .withIndex('by_owner', (q: any) => q.eq('ownerId', user._id))
+      .collect();
+
+    // Get projects where user is a contributor
+    const contributions = await ctx.db
+      .query('projectContributors')
+      .withIndex('by_user', (q: any) => q.eq('userId', user._id))
+      .collect();
+
+    const contributedProjects = await Promise.all(
+      contributions.map(async (contrib: any) => {
+        const project = await ctx.db.get(contrib.projectId);
+        return project ? { ...project, userRole: contrib.role, joinedAt: contrib.joinedAt } : null;
+      })
+    );
+
+    const allProjects = [
+      ...ownedProjects.map((p: any) => ({ ...p, userRole: 'owner' })),
+      ...contributedProjects.filter((p: any) => p !== null)
+    ];
+
+    // Remove duplicates and sort by last activity
+    const uniqueProjects = allProjects.filter((project: any, index: number, self: any[]) => 
+      index === self.findIndex((p: any) => p._id === project._id)
+    );
+
+    return uniqueProjects.sort((a: any, b: any) => b.stats.lastActivity - a.stats.lastActivity);
+>>>>>>> 745733d (feat: Implement user and community management with ownership validation and enhanced API functions)
   }
 });
 
