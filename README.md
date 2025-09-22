@@ -1,53 +1,279 @@
-# Prico# Prico
+# Prico
 
+A full-stack collaborative coding platform with real-time chat, community management, project collaboration, and GitHub integration.
 
+**Discord-level chat + VSCode-level collaborative editor + GitHub-level publishing**
 
-A full-stack collaborative coding platform with real-time chat, community management, project collaboration, and GitHub integration.A full-stack collaborative coding platform with real-time chat, community management, project collaboration, and GitHub integration.
+## 🚀 Quick Start
 
+```bash
+# Clone and setup
+git clone <repository-url>
+cd prico
+npm install
 
+# Start development services
+docker-compose up -d redis mongodb
+npm run dev
+```
 
-## Technology Stack## Technology Stack
+- **Web app**: http://localhost:3000
+- **Socket server**: http://localhost:3001
+- **API docs**: [docs/api.md](docs/api.md)
+- **Socket events**: [docs/socket.md](docs/socket.md)
 
+## 🏗️ Architecture
 
+### Frontend: Next.js App Router
+- **Framework**: Next.js 15 with React 18, TypeScript
+- **Styling**: TailwindCSS + shadcn/ui components  
+- **Editor**: Monaco Editor with Yjs CRDT
+- **Auth**: Clerk integration
+- **Real-time**: Socket.IO client
 
-- **Frontend**: Next.js 15 with React 18, TypeScript, Tailwind CSS, shadcn/ui- **Frontend**: Next.js 15 with React 18, TypeScript, Tailwind CSS, shadcn/ui
+### Backend: Microservices
+- **Socket Server**: Express + Socket.IO for real-time communication
+- **Git Service**: NodeGit for repository operations
+- **Runner Service**: Docker-based code execution
+- **Upload Service**: S3 file management
 
-- **Backend**: Node.js with Express.js, Socket.IO for real-time communication, NodeGit for Git operations- **Backend**: Node.js with Express.js, Socket.IO for real-time communication, NodeGit for Git operations
+### Database & Storage
+- **Database**: MongoDB Atlas (remote clusters)
+- **Cache**: Redis for Socket.IO adapter and job queues
+- **Storage**: S3-compatible for attachments and repos
+- **Real-time**: Yjs WebSocket provider for collaborative editing
 
-- **Database**: MongoDB Atlas- **Database**: MongoDB Atlas
+## 🎯 Features
 
-- **Authentication**: Clerk for user management- **Authentication**: Clerk for user management
+### 💬 Discord-Level Chat
+- **Communities & Channels**: Public/private with role permissions
+- **Real-time Messaging**: Typing indicators, reactions, threads, mentions
+- **Direct Messages**: Friend system with private conversations
+- **Voice & Video**: WebRTC calls with screen sharing
+- **File Attachments**: S3 upload with inline previews
 
-- **Realtime**: Socket.IO, Yjs for collaborative editing- **Realtime**: Socket.IO, Yjs for collaborative editing
+### 👨‍💻 VSCode-Level Editor  
+- **Collaborative Editing**: Monaco + Yjs CRDT with live cursors
+- **Multi-language Support**: Syntax highlighting, IntelliSense
+- **Git Integration**: Auto-commit on save, branch management
+- **Live Preview**: Instant code execution and output
 
-- **Execution**: Docker-based code runner- **Execution**: Docker-based code runner
+### 📂 GitHub-Level Publishing
+- **Project Management**: Public/private repositories with Git backing
+- **Fork & PR Workflow**: Branch management, merge conflict resolution
+- **Code Review**: Inline comments, approval workflow
+- **Release Management**: Semantic versioning, change logs
 
-- **UI Components**: shadcn/ui with Tailwind CSS- **UI Components**: shadcn/ui with Tailwind CSS
+### 👤 User Profiles & Social
+- **GitHub-style Profiles**: Display name, bio, badges, public projects
+- **Achievement System**: Automated badges for contributions
+- **Friends & Following**: Social connections and activity feeds
+- **Privacy Controls**: Toggleable visibility for projects and communities
 
+## 📋 Development Status
 
+### ✅ Completed (Commit 1)
+- [x] **Monorepo Structure**: `/web` (Next.js) + `/server` microservices
+- [x] **Next.js Setup**: App Router, TypeScript, TailwindCSS, shadcn/ui
+- [x] **Environment Template**: All required variables documented
+- [x] **Documentation**: API, Socket events, deployment guides
+- [x] **Docker Compose**: Redis + MongoDB for local development
 
-## Features## Features
+### 🔄 In Progress  
+- [ ] **Clerk Authentication**: Sign-up/login pages + MongoDB user sync
 
+### ⏳ Next Steps (Incremental Roadmap)
+1. **Auth Integration**: Clerk → MongoDB user sync
+2. **Database Models**: User, Community, Channel, Message schemas
+3. **Communities API**: Create/list/join endpoints + basic UI
+4. **Real-time Chat**: Socket.IO messaging with persistence 
+5. **File Uploads**: S3 integration for attachments
+6. **Collaborative Editor**: Monaco + Yjs integration
+7. **Git Operations**: NodeGit service for repositories
+8. **Code Execution**: Docker runner with safe sandboxing
+9. **Voice/Video**: WebRTC signaling via Socket.IO
+10. **Testing & CI**: Jest tests + GitHub Actions pipeline
 
+## 🛠️ Tech Stack
 
-- **Real-time Chat**: Community channels with typing indicators, reactions, threads, mentions- **Real-time Chat**: Community channels with typing indicators, reactions, threads, mentions
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Frontend** | Next.js 15 + React 18 | App Router, SSR, TypeScript |
+| **Styling** | TailwindCSS + shadcn/ui | Component system, responsive design |
+| **Auth** | Clerk | User management, session handling |
+| **Database** | MongoDB Atlas | Document storage, indexes |
+| **Cache** | Redis | Socket.IO adapter, job queues |
+| **Real-time** | Socket.IO | Chat, presence, WebRTC signaling |
+| **Editor** | Monaco + Yjs | Collaborative editing with CRDT |
+| **Git** | NodeGit | Server-side repository operations |
+| **Execution** | Docker | Safe code sandboxing |
+| **Storage** | S3 Compatible | File uploads, repository artifacts |
+| **Monitoring** | Sentry | Error tracking and performance |
 
-- **Community Management**: Create and join communities with role-based permissions- **Community Management**: Create and join communities with role-based permissions
+## 📁 Project Structure
 
-- **Project Collaboration**: Manage projects with Git backing, forks, PRs, diffs, merges- **Project Collaboration**: Manage projects with Git backing, forks, PRs, diffs, merges
+```
+/workspaces/prico/
+├── web/                    # Next.js frontend application
+│   ├── app/               # App Router pages
+│   │   ├── (auth)/        # Authentication pages
+│   │   ├── communities/   # Community management
+│   │   ├── projects/      # Project pages
+│   │   ├── profile/       # User profiles
+│   │   └── editor/        # Collaborative editor
+│   ├── components/        # Reusable UI components
+│   ├── lib/              # Client-side utilities
+│   │   ├── api/          # REST API wrappers
+│   │   ├── auth/         # Clerk integration
+│   │   ├── socket/       # Socket.IO client
+│   │   └── editor/       # Monaco + Yjs adapters
+│   └── package.json
+├── server/                # Backend microservices
+│   ├── socket-server/     # Socket.IO + Express server
+│   ├── git-service/       # NodeGit worker service
+│   ├── runner/           # Docker code execution
+│   └── uploads/          # File upload service
+├── docs/                 # API and deployment documentation
+├── infra/                # Terraform, Kubernetes manifests
+├── scripts/              # Database setup, utilities
+├── docker-compose.yml    # Local development services
+└── package.json          # Monorepo workspace configuration
+```
 
-- **Collaborative Editor**: Monaco Editor with Yjs CRDT for real-time multi-user editing- **Collaborative Editor**: Monaco Editor with Yjs CRDT for real-time multi-user editing
+## 🚀 Getting Started
 
-- **Friend System**: Send friend requests and manage social connections- **Friend System**: Send friend requests and manage social connections
+### Prerequisites
 
-- **Voice/Video**: WebRTC calls with screen sharing- **Voice/Video**: WebRTC calls with screen sharing
+- **Node.js** 18+ and npm 9+
+- **Docker** and Docker Compose
+- **Git** for version control
 
-- **Code Execution**: Safe cloud code execution via Docker- **Code Execution**: Safe cloud code execution via Docker
+### Environment Setup
 
-- **User Profiles**: GitHub-like profiles with badges, public projects, communities- **User Profiles**: GitHub-like profiles with badges, public projects, communities
+1. **Copy environment template:**
+   ```bash
+   cp .env.template .env
+   ```
 
+2. **Configure required services:**
+   - **MongoDB Atlas**: Create cluster and get connection string
+   - **Clerk**: Create application and get API keys
+   - **S3 Compatible Storage**: Configure bucket and credentials
 
+3. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
+### Development Workflow
+
+1. **Start infrastructure services:**
+   ```bash
+   docker-compose up -d redis mongodb
+   ```
+
+2. **Start development servers:**
+   ```bash
+   npm run dev
+   # Starts both web (3000) and socket server (3001)
+   ```
+
+3. **Access applications:**
+   - **Web App**: http://localhost:3000
+   - **Socket Server**: http://localhost:3001
+   - **Redis**: localhost:6379
+   - **MongoDB**: localhost:27017
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites  
+npm run test:web      # Frontend tests
+npm run test:server   # Backend tests
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
+## 📖 Documentation
+
+- **[API Reference](docs/api.md)**: REST endpoints with examples
+- **[Socket Events](docs/socket.md)**: Real-time event documentation  
+- **[Deployment Guide](docs/deployment.md)**: Production setup instructions
+- **[Architecture Spec](PRICO-SPEC.md)**: Complete technical specification
+
+## 🔐 Security
+
+- **Authentication**: Clerk-managed with server-side verification
+- **Rate Limiting**: 5 messages/sec, 100 API calls/min per user
+- **Input Sanitization**: XSS protection for markdown content
+- **Container Security**: Unprivileged Docker execution
+- **Path Validation**: Git operations with sanitized paths
+
+## 🤝 Contributing
+
+1. **Fork the repository**
+2. **Create feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make changes**: Follow TypeScript + ESLint conventions
+4. **Add tests**: Unit tests for new functionality
+5. **Submit PR**: Include description and test instructions
+
+### Commit Message Format
+
+Follow the incremental roadmap with meaningful commits:
+
+```
+feat(auth): integrate Clerk with MongoDB user sync
+feat(chat): add real-time messaging with Socket.IO  
+feat(editor): implement Monaco + Yjs collaborative editing
+feat(git): add NodeGit service for repository operations
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🎯 Roadmap
+
+### Phase 1: Foundation (Current)
+- [x] Monorepo setup and documentation
+- [ ] Clerk authentication integration
+- [ ] MongoDB models and connection
+- [ ] Basic communities and channels
+
+### Phase 2: Real-time Features  
+- [ ] Socket.IO chat system
+- [ ] File upload and attachments
+- [ ] Typing indicators and presence
+- [ ] Voice/video calling
+
+### Phase 3: Collaborative Features
+- [ ] Monaco editor integration
+- [ ] Yjs collaborative editing
+- [ ] Git repository management
+- [ ] Fork and pull request workflow
+
+### Phase 4: Advanced Features
+- [ ] Docker code execution
+- [ ] Achievement and badge system
+- [ ] Advanced search and discovery
+- [ ] Mobile responsive design
+
+### Phase 5: Scale & Polish
+- [ ] Performance optimization
+- [ ] Advanced monitoring
+- [ ] Mobile app (React Native)
+- [ ] Enterprise features
+
+---
+
+**Built with ❤️ using Next.js, Socket.IO, and MongoDB**
 ## Project Structure## Project Structure
 
 

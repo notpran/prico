@@ -1,20 +1,39 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:7.0
+  # Redis for Socket.IO adapter and BullMQ
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # MongoDB (for local development - production uses Atlas)
+  mongodb:
+    image: mongo:7
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: prico
     volumes:
-      - mongo_data:/data/db
+      - mongodb_data:/data/db
 
-  redis:
-    image: redis:7.2-alpine
+  # Y-WebSocket server for collaborative editing
+  y-websocket:
+    image: node:18-alpine
+    working_dir: /app
     ports:
-      - "6379:6379"
+      - "1234:1234"
+    volumes:
+      - ./server/y-websocket:/app
+    command: sh -c "npm install && npm start"
+    depends_on:
+      - redis
 
 volumes:
-  mongo_data:
+  redis_data:
+  mongodb_data:
