@@ -1,6 +1,6 @@
 // src/lib/redis.ts - Redis configuration for scaling
 
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
 
 const redisConfig = {
   host: process.env.REDIS_HOST || 'localhost',
@@ -11,117 +11,148 @@ const redisConfig = {
   enableReadyCheck: false,
   maxRetriesPerRequest: 3,
   lazyConnect: true,
-  // Clustering configuration
-  cluster: process.env.REDIS_CLUSTER === 'true' ? {
-    enableOfflineQueue: false,
-    redisOptions: {
-      password: process.env.REDIS_PASSWORD,
-    },
-  } : undefined,
-  // Sentinel configuration
-  sentinels: process.env.REDIS_SENTINELS ? JSON.parse(process.env.REDIS_SENTINELS) : undefined,
-  name: process.env.REDIS_MASTER_NAME || 'mymaster',
 };
 
-// Create Redis client
-export const redis = process.env.REDIS_CLUSTER === 'true'
-  ? new Redis.Cluster(
-      JSON.parse(process.env.REDIS_CLUSTER_NODES || '[]'),
-      redisConfig
-    )
-  : new Redis(redisConfig);
+let redisClient: Redis | null = null;
+let redisAvailable = false;
 
-// Connection event handlers
-redis.on('connect', () => {
-  console.log('Redis connected');
-});
+function initRedis(): void {
+  if (redisClient) return;
+  
+  try {
+    redisClient = new Redis(redisConfig);
+    redisAvailable = true;
+    
+    redisClient.on('connect', () => {
+      console.log('Redis connected');
+    });
+    
+    redisClient.on('ready', () => {
+      console.log('Redis ready');
+    });
+    
+    redisClient.on('error', (err) => {
+      console.error('Redis error:', err);
+      redisAvailable = false;
+    });
+    
+    redisClient.on('close', () => {
+      console.log('Redis connection closed');
+      redisAvailable = false;
+    });
+  } catch (error) {
+    console.warn('Failed to initialize Redis:', error);
+    redisAvailable = false;
+  }
+}
 
-redis.on('ready', () => {
-  console.log('Redis ready');
-});
+// Initialize Redis
+initRedis();
 
-redis.on('error', (err) => {
-  console.error('Redis error:', err);
-});
-
-redis.on('close', () => {
-  console.log('Redis connection closed');
-});
+export const redis = {
+  async get(key: string): Promise<string | null> {
+    if (!redisAvailable || !redisClient) return null;
+    try {
+      return await redisClient.get(key);
+    } catch {
+      return null;
+    }
+  },
+  
+  async set(key: string, value: string): Promise<void> {
+    if (!redisAvailable || !redisClient) return;
+    try {
+      await redisClient.set(key, value);
+    } catch {
+      // Ignore errors
+    }
+  },
+  
+  async setex(key: string, ttl: number, value: string): Promise<void> {
+    if (!redisAvailable || !redisClient) return;
+    try {
+      await redisClient.setex(key, ttl, value);
+    } catch {
+      // Ignore errors
+    }
+  },
+  
+  async del(key: string): Promise<number> {
+    if (!redisAvailable || !redisClient) return 0;
+    try {
+      return await redisClient.del(key);
+    } catch {
+      return 0;
+    }
+  },
+  
+  async exists(key: string): Promise<number> {
+    if (!redisAvailable || !redisClient) return 0;
+    try {
+      return await redisClient.exists(key);
+    } catch {
+      return 0;
+    }
+  },
+  
+  async expire(key: string, ttl: number): Promise<number> {
+    if (!redisAvailable || !redisClient) return 0;
+    try {
+      return await redisClient.expire(key, ttl);
+    } catch {
+      return 0;
+    }
+  },
+  
+  async zadd(key: string, score: number, member: string): Promise<number> {
+    if (!redisAvailable || !redisClient) return 0;
+    try {
+      return await redisClient.zadd(key, score, member);
+    } catch {
+      return 0;
+    }
+  },
+  
+  async zcount(key: string, min: number, max: number): Promise<number> {
+    if (!redisAvailable || !redisClient) return 0;
+    try {
+      return await redisClient.zcount(key, min, max);
+    } catch {
+      return 0;
+    }
+  },
+  
+  async zremrangebyscore(key: string, min: number, max: number): Promise<number> {
+    if (!redisAvailable || !redisClient) return 0;
+    try {
+      return await redisClient.zremrangebyscore(key, min, max);
+    } catch {
+      return 0;
+    }
+  },
+  
+  on(event: string, handler: Function): void {
+    if (redisClient) {
+      redisClient.on(event, handler);
+    }
+  }
+};
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('Closing Redis connection...');
-  await redis.quit();
+  if (redisClient) {
+    await redisClient.quit();
+  }
 });
 
 process.on('SIGINT', async () => {
   console.log('Closing Redis connection...');
-  await redis.quit();
+  if (redisClient) {
+    await redisClient.quit();
+  }
 });
 
-// Cache utilities with TTL
-export class Cache {
-  private prefix: string;
-
-  constructor(prefix = 'prico') {
-    this.prefix = prefix;
-  }
-
-  private getKey(key: string): string {
-    return `${this.prefix}:${key}`;
-  }
-
-  async get(key: string): Promise<string | null> {
-    try {
-      return await redis.get(this.getKey(key));
-    } catch (error) {
-      console.error('Cache get error:', error);
-      return null;
-    }
-  }
-
-  async set(key: string, value: string, ttl?: number): Promise<void> {
-    try {
-      if (ttl) {
-        await redis.setex(this.getKey(key), ttl, value);
-      } else {
-        await redis.set(this.getKey(key), value);
-      }
-    } catch (error) {
-      console.error('Cache set error:', error);
-    }
-  }
-
-  async del(key: string): Promise<void> {
-    try {
-      await redis.del(this.getKey(key));
-    } catch (error) {
-      console.error('Cache del error:', error);
-    }
-  }
-
-  async exists(key: string): Promise<boolean> {
-    try {
-      const result = await redis.exists(this.getKey(key));
-      return result === 1;
-    } catch (error) {
-      console.error('Cache exists error:', error);
-      return false;
-    }
-  }
-
-  async expire(key: string, ttl: number): Promise<void> {
-    try {
-      await redis.expire(this.getKey(key), ttl);
-    } catch (error) {
-      console.error('Cache expire error:', error);
-    }
-  }
-}
-
-export const cache = new Cache();
-
-// Rate limiting with Redis
 export class RateLimiter {
   private windowMs: number;
   private maxRequests: number;
@@ -132,11 +163,11 @@ export class RateLimiter {
   }
 
   async isRateLimited(key: string): Promise<boolean> {
-    const redisKey = `ratelimit:${key}`;
-    const now = Date.now();
-    const windowStart = now - this.windowMs;
-
     try {
+      const redisKey = `ratelimit:${key}`;
+      const now = Date.now();
+      const windowStart = now - this.windowMs;
+
       // Remove old entries
       await redis.zremrangebyscore(redisKey, 0, windowStart);
 
