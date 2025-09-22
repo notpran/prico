@@ -1,6 +1,10 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
-import { Id } from './_generated/dataModel';
+
+// Helper function to generate invite code
+function generateInviteCode(): string {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
 // Get user's communities
 export const getUserCommunities = query({
@@ -9,7 +13,6 @@ export const getUserCommunities = query({
     const memberships = await ctx.db
       .query('communityMembers')
       .withIndex('by_user', (q) => q.eq('userId', userId))
-      .filter((q) => q.eq(q.field('isActive'), true))
       .collect();
 
     const communities = await Promise.all(
@@ -21,7 +24,6 @@ export const getUserCommunities = query({
           ...community,
           membershipRole: membership.role,
           membershipJoinedAt: membership.joinedAt,
-          unreadCount: 0 // Will implement real unread counting
         };
       })
     );
@@ -32,24 +34,23 @@ export const getUserCommunities = query({
 
 // Get public communities for discovery
 export const getPublicCommunities = query({
-  args: { 
+  args: {
     limit: v.optional(v.number()),
     search: v.optional(v.string()),
     tags: v.optional(v.array(v.string()))
   },
   handler: async (ctx, { limit = 50, search, tags }) => {
-    let query = ctx.db
+    let communities = await ctx.db
       .query('communities')
-      .withIndex('by_public', (q) => q.eq('isPublic', true));
-
-    const communities = await query.collect();
+      .withIndex('by_public', (q) => q.eq('isPublic', true))
+      .collect();
 
     let filtered = communities;
 
     // Apply search filter
     if (search) {
       const searchLower = search.toLowerCase();
-      filtered = filtered.filter(community => 
+      filtered = filtered.filter(community =>
         community.name.toLowerCase().includes(searchLower) ||
         community.description.toLowerCase().includes(searchLower) ||
         community.tags.some(tag => tag.toLowerCase().includes(searchLower))
@@ -63,12 +64,18 @@ export const getPublicCommunities = query({
       );
     }
 
-    // Sort by member count and recent activity
-    filtered.sort((a, b) => {
-      return b.memberCount - a.memberCount || b.updatedAt - a.updatedAt;
-    });
-
     return filtered.slice(0, limit);
+  }
+});
+
+// Get community by slug
+export const getCommunityBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, { slug }) => {
+    return await ctx.db
+      .query('communities')
+      .withIndex('by_slug', (q) => q.eq('slug', slug))
+      .first();
   }
 });
 
@@ -80,11 +87,7 @@ export const createCommunity = mutation({
     slug: v.string(),
     ownerId: v.id('users'),
     isPublic: v.boolean(),
-    tags: v.array(v.string()),
-    rules: v.optional(v.array(v.object({
-      title: v.string(),
-      description: v.string()
-    })))
+    tags: v.array(v.string())
   },
   handler: async (ctx, args) => {
     // Check if slug is already taken
@@ -98,46 +101,50 @@ export const createCommunity = mutation({
     }
 
     const now = Date.now();
-    
     const communityId = await ctx.db.insert('communities', {
       name: args.name,
       description: args.description,
       slug: args.slug,
       ownerId: args.ownerId,
       isPublic: args.isPublic,
+      tags: args.tags,
       memberCount: 1,
-      inviteCode: generateInviteCode(),
       settings: {
         allowInvites: true,
         requireApproval: false,
-        allowDiscovery: args.isPublic,
+        allowDiscovery: true,
         defaultRole: 'member'
       },
-      tags: args.tags,
-      rules: args.rules || [],
+      rules: [],
       createdAt: now,
       updatedAt: now
     });
 
     // Add owner as member
     await ctx.db.insert('communityMembers', {
-      communityId,
+      communityId: communityId,
       userId: args.ownerId,
       role: 'owner',
       joinedAt: now,
-      permissions: ['all'],
+      permissions: ['invite', 'kick', 'ban', 'manage_channels', 'manage_roles'],
       isActive: true
     });
 
     // Create default channels
     const generalChannelId = await ctx.db.insert('channels', {
-      communityId,
+      communityId: communityId,
       name: 'general',
-      description: 'General discussion',
       type: 'text',
-      isPrivate: false,
+      description: 'General discussion',
       position: 0,
-      permissions: [],
+      isPrivate: false,
+      permissions: [
+        {
+          roleId: 'everyone',
+          allow: ['read', 'write'],
+          deny: []
+        }
+      ],
       messageCount: 0,
       createdAt: now
     });
@@ -146,106 +153,108 @@ export const createCommunity = mutation({
   }
 });
 
-// Get communities for a user
-export const getUserCommunities = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    const communities = await ctx.db
-      .query("communities")
-      .collect();
-    
-    return communities.filter(community => 
-      community.memberIds.includes(args.userId)
-    );
-  },
-});
-
-// Get public communities
-export const getPublicCommunities = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("communities")
-      .withIndex("by_privacy", (q) => q.eq("privacy", "public"))
-      .collect();
-  },
-});
-
-// Join a community
+// Join community
 export const joinCommunity = mutation({
   args: {
-    communityId: v.id("communities"),
-    userId: v.id("users"),
+    communityId: v.id('communities'),
+    userId: v.id('users')
   },
   handler: async (ctx, args) => {
+    // Check if user is already a member
+    const existingMembership = await ctx.db
+      .query('communityMembers')
+      .filter((q) => q.eq(q.field('communityId'), args.communityId))
+      .filter((q) => q.eq(q.field('userId'), args.userId))
+      .first();
+
+    if (existingMembership) {
+      throw new Error('User is already a member of this community');
+    }
+
     const community = await ctx.db.get(args.communityId);
     if (!community) {
-      throw new Error("Community not found");
+      throw new Error('Community not found');
     }
 
-    if (community.memberIds.includes(args.userId)) {
-      throw new Error("User already in community");
+    // Check if community requires approval
+    if (community.settings.requireApproval) {
+      // For now, auto-approve. In a real app, you'd have pending status
     }
 
-    await ctx.db.patch(args.communityId, {
-      memberIds: [...community.memberIds, args.userId],
-      updatedAt: Date.now(),
+    const now = Date.now();
+    await ctx.db.insert('communityMembers', {
+      communityId: args.communityId,
+      userId: args.userId,
+      role: 'member',
+      joinedAt: now,
+      permissions: [],
+      isActive: true
     });
-  },
+
+    // Update member count
+    await ctx.db.patch(args.communityId, {
+      memberCount: community.memberCount + 1
+    });
+
+    return true;
+  }
 });
 
-// Leave a community
+// Leave community
 export const leaveCommunity = mutation({
   args: {
-    communityId: v.id("communities"),
-    userId: v.id("users"),
+    communityId: v.id('communities'),
+    userId: v.id('users')
   },
   handler: async (ctx, args) => {
-    const community = await ctx.db.get(args.communityId);
-    if (!community) {
-      throw new Error("Community not found");
+    const membership = await ctx.db
+      .query('communityMembers')
+      .filter((q) => q.eq(q.field('communityId'), args.communityId))
+      .filter((q) => q.eq(q.field('userId'), args.userId))
+      .first();
+
+    if (!membership) {
+      throw new Error('User is not a member of this community');
     }
 
-    if (community.ownerId === args.userId) {
-      throw new Error("Owner cannot leave community");
+    if (membership.role === 'owner') {
+      throw new Error('Community owner cannot leave the community');
     }
 
-    await ctx.db.patch(args.communityId, {
-      memberIds: community.memberIds.filter(id => id !== args.userId),
-      adminIds: community.adminIds.filter(id => id !== args.userId),
-      updatedAt: Date.now(),
-    });
-  },
-});
+    // Remove membership
+    await ctx.db.delete(membership._id);
 
-// Get community details
-export const getCommunity = query({
-  args: { communityId: v.id("communities") },
-  handler: async (ctx, args) => {
+    // Update member count
     const community = await ctx.db.get(args.communityId);
-    if (!community) return null;
+    if (community) {
+      await ctx.db.patch(args.communityId, {
+        memberCount: Math.max(0, community.memberCount - 1)
+      });
+    }
 
-    const channels = await ctx.db
-      .query("channels")
-      .withIndex("by_community", (q) => q.eq("communityId", args.communityId))
-      .collect();
-
-    return {
-      ...community,
-      channels: channels.sort((a, b) => a.position - b.position),
-    };
-  },
+    return true;
+  }
 });
 
-// Get community channels (separate function for better caching)
-export const getCommunityChannels = query({
-  args: { communityId: v.id("communities") },
-  handler: async (ctx, args) => {
-    const channels = await ctx.db
-      .query("channels")
-      .withIndex("by_community", (q) => q.eq("communityId", args.communityId))
+// Get community members
+export const getCommunityMembers = query({
+  args: { communityId: v.id('communities') },
+  handler: async (ctx, { communityId }) => {
+    const members = await ctx.db
+      .query('communityMembers')
+      .withIndex('by_community', (q) => q.eq('communityId', communityId))
       .collect();
 
-    return channels.sort((a, b) => a.position - b.position);
-  },
+    const membersWithUsers = await Promise.all(
+      members.map(async (member) => {
+        const user = await ctx.db.get(member.userId);
+        return {
+          ...member,
+          user
+        };
+      })
+    );
+
+    return membersWithUsers.filter(m => m.user);
+  }
 });
