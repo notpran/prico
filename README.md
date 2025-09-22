@@ -1,82 +1,192 @@
-# Prico
+# Prico# Prico
 
-A full-stack collaborative coding platform with real-time chat, community management, project collaboration, and GitHub integration.
 
-## Technology Stack
 
-- **Frontend**: Next.js 15 with React 18, TypeScript, Tailwind CSS
-- **Backend**: Node.js with Express.js, Socket.IO for real-time communication
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: Clerk for user management
-- **UI Components**: Radix UI with custom styling
+A full-stack collaborative coding platform with real-time chat, community management, project collaboration, and GitHub integration.A full-stack collaborative coding platform with real-time chat, community management, project collaboration, and GitHub integration.
 
-## Features
 
-- **Real-time Chat**: Community channels with typing indicators and reactions
-- **Community Management**: Create and join communities with role-based permissions
-- **Project Collaboration**: Manage projects with GitHub repository integration
-- **Friend System**: Send friend requests and manage social connections
-- **GitHub Integration**: Track issues, pull requests, commits, and branches
-- **User Profiles**: Customizable profiles with skills and preferences
 
-## Quick Start
+## Technology Stack## Technology Stack
 
-### Prerequisites
 
-- Node.js 18+
-- MongoDB (local or cloud instance)
-- npm or yarn
 
-### Setup
+- **Frontend**: Next.js 15 with React 18, TypeScript, Tailwind CSS, shadcn/ui- **Frontend**: Next.js 15 with React 18, TypeScript, Tailwind CSS, shadcn/ui
 
-1. **Clone and install dependencies:**
-   ```bash
-   git clone <repository-url>
-   cd prico
-   npm run setup
-   ```
+- **Backend**: Node.js with Express.js, Socket.IO for real-time communication, NodeGit for Git operations- **Backend**: Node.js with Express.js, Socket.IO for real-time communication, NodeGit for Git operations
 
-2. **Configure environment variables:**
-   Copy the `.env` file and update the values:
-   ```env
-   # Database
-   MONGODB_URI=mongodb://localhost:27017/prico
+- **Database**: MongoDB Atlas- **Database**: MongoDB Atlas
 
-   # Authentication
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-key
-   CLERK_SECRET_KEY=your-clerk-secret
+- **Authentication**: Clerk for user management- **Authentication**: Clerk for user management
 
-   # API URLs
-   NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
-   NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+- **Realtime**: Socket.IO, Yjs for collaborative editing- **Realtime**: Socket.IO, Yjs for collaborative editing
 
-   # JWT Secret
-   JWT_SECRET=your-super-secret-jwt-key
-   ```
+- **Execution**: Docker-based code runner- **Execution**: Docker-based code runner
 
-3. **Start MongoDB:**
-   Make sure MongoDB is running locally or update `MONGODB_URI` for your database.
+- **UI Components**: shadcn/ui with Tailwind CSS- **UI Components**: shadcn/ui with Tailwind CSS
 
-4. **Run the full application:**
-   ```bash
-   npm run dev:full
-   ```
 
-   This will start both the Next.js frontend (http://localhost:3000) and Express backend (http://localhost:3001).
 
-## Development Scripts
+## Features## Features
 
-- `npm run dev` - Start frontend only
-- `npm run dev:backend` - Start backend only
-- `npm run dev:full` - Start both frontend and backend
-- `npm run build:all` - Build both frontend and backend
-- `npm run start:all` - Start both in production mode
 
-## Project Structure
 
-```
-prico/
-├── frontend/               # Next.js frontend
+- **Real-time Chat**: Community channels with typing indicators, reactions, threads, mentions- **Real-time Chat**: Community channels with typing indicators, reactions, threads, mentions
+
+- **Community Management**: Create and join communities with role-based permissions- **Community Management**: Create and join communities with role-based permissions
+
+- **Project Collaboration**: Manage projects with Git backing, forks, PRs, diffs, merges- **Project Collaboration**: Manage projects with Git backing, forks, PRs, diffs, merges
+
+- **Collaborative Editor**: Monaco Editor with Yjs CRDT for real-time multi-user editing- **Collaborative Editor**: Monaco Editor with Yjs CRDT for real-time multi-user editing
+
+- **Friend System**: Send friend requests and manage social connections- **Friend System**: Send friend requests and manage social connections
+
+- **Voice/Video**: WebRTC calls with screen sharing- **Voice/Video**: WebRTC calls with screen sharing
+
+- **Code Execution**: Safe cloud code execution via Docker- **Code Execution**: Safe cloud code execution via Docker
+
+- **User Profiles**: GitHub-like profiles with badges, public projects, communities- **User Profiles**: GitHub-like profiles with badges, public projects, communities
+
+
+
+## Project Structure## Project Structure
+
+
+
+This is a monorepo using npm workspaces.This is a monorepo using npm workspaces.
+
+
+
+``````
+
+/repo-root/repo-root
+
+  /web                  # Next.js app (App Router)  /web                  # Next.js app (App Router)
+
+  /server               # Standalone backend microservices  /server               # Standalone backend microservices
+
+    /socket-server      # Socket.IO server    /socket-server      # Socket.IO server
+
+    /git-service        # NodeGit worker    /git-service        # NodeGit worker
+
+    /runner             # Docker code runner    /runner             # Docker code runner
+
+    /uploads            # File upload service    /uploads            # File upload service
+
+  /infra                # Infrastructure configs  /infra                # Infrastructure configs
+
+  /scripts              # Utility scripts  /scripts              # Utility scripts
+
+  package.json          # Root package.json with workspaces  package.json          # Root package.json with workspaces
+
+  docker-compose.yml    # Dev environment  docker-compose.yml    # Dev environment
+
+  .env.example          # Environment variables template  .env.example          # Environment variables template
+
+  PRICO-SPEC.md         # Detailed specification  PRICO-SPEC.md         # Detailed specification
+
+``````
+
+
+
+## Quick Start## Quick Start
+
+
+
+### Prerequisites### Prerequisites
+
+
+
+- Node.js 18+- Node.js 18+
+
+- Docker & Docker Compose- Docker & Docker Compose
+
+- MongoDB Atlas account (or local Mongo)- MongoDB Atlas account (or local Mongo)
+
+- Clerk account for auth- Clerk account for auth
+
+
+
+### Setup### Setup
+
+
+
+1. **Clone and install dependencies:**1. **Clone and install dependencies:**
+
+   ```bash   ```bash
+
+   git clone <repository-url>   git clone <repository-url>
+
+   cd prico   cd prico
+
+   npm install   npm install
+
+   ```   ```
+
+
+
+2. **Start development environment:**2. **Start development environment:**
+
+   ```bash   ```bash
+
+   docker-compose up -d  # Starts MongoDB and Redis   docker-compose up -d  # Starts MongoDB and Redis
+
+   npm run dev           # Starts all services   npm run dev           # Starts all services
+
+   ```   ```
+
+
+
+3. **Configure environment variables:**3. **Configure environment variables:**
+
+   Copy `.env.example` to `.env` and fill in your values:   Copy `.env.example` to `.env` and fill in your values:
+
+   ```env   ```env
+
+   MONGODB_URI=mongodb+srv://...   MONGODB_URI=mongodb+srv://...
+
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+
+   CLERK_SECRET_KEY=...   CLERK_SECRET_KEY=...
+
+   # etc.   # etc.
+
+   ```   ```
+
+
+
+4. **Open in browser:**4. **Open in browser:**
+
+   - Frontend: http://localhost:3000   - Frontend: http://localhost:3000
+
+   - Socket server: http://localhost:3001 (if separate)   - Socket server: http://localhost:3001 (if separate)
+
+
+
+## Development## Development
+
+
+
+- `npm run dev` - Start all services in development mode- `npm run dev` - Start all services in development mode
+
+- `npm run build` - Build all workspaces- `npm run build` - Build all workspaces
+
+- `npm run test` - Run tests across workspaces- `npm run test` - Run tests across workspaces
+
+
+
+## Deployment## Deployment
+
+
+
+See `/docs/deployment.md` for detailed deployment instructions.See `/docs/deployment.md` for detailed deployment instructions.
+
+
+
+## Contributing## Contributing
+
+
+
+See `PRICO-SPEC.md` for the full specification and development roadmap.See `PRICO-SPEC.md` for the full specification and development roadmap.
 │   ├── src/
 │   │   ├── app/           # Next.js app router
 │   │   ├── components/    # React components
