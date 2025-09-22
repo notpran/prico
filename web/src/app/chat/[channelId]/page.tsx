@@ -18,13 +18,15 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [optimisticMessages, setOptimisticMessages] = useState<{ tempId: string; content: string }[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     socketManager.connect();
     socketManager.joinChannel(channelId as string);
 
-    // Fetch existing messages
+    // Fetch initial messages
     fetchMessages();
 
     // Listen for new messages
@@ -40,11 +42,29 @@ export default function ChatPage() {
     };
   }, [channelId]);
 
-  const fetchMessages = async () => {
-    const res = await fetch(`/api/channels/${channelId}/messages`);
+  const fetchMessages = async (before?: string) => {
+    setLoading(true);
+    const url = before
+      ? `/api/channels/${channelId}/messages?before=${before}&limit=20`
+      : `/api/channels/${channelId}/messages?limit=20`;
+    const res = await fetch(url);
     if (res.ok) {
       const data = await res.json();
-      setMessages(data);
+      if (before) {
+        setMessages((prev) => [...data, ...prev]);
+      } else {
+        setMessages(data);
+      }
+      if (data.length < 20) {
+        setHasMore(false);
+      }
+    }
+    setLoading(false);
+  };
+
+  const loadMore = () => {
+    if (messages.length > 0) {
+      fetchMessages(messages[0]._id);
     }
   };
 
@@ -74,6 +94,11 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-1 overflow-y-auto p-4">
+        {hasMore && (
+          <Button onClick={loadMore} disabled={loading} className="mb-4">
+            {loading ? 'Loading...' : 'Load More'}
+          </Button>
+        )}
         {messages.map((msg) => (
           <div key={msg._id} className="mb-2">
             <strong>{msg.authorId}:</strong> {msg.content}
