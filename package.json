@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=web\" \"npm run dev --workspace=server/socket-server\"",
+    "dev:web": "npm run dev --workspace=web",
+    "dev:socket": "npm run dev --workspace=server/socket-server",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces"
