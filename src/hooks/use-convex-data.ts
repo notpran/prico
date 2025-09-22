@@ -1,21 +1,53 @@
 'use client';
 
-import { useConvexAuth, useQuery } from 'convex/react';
+import { useConvexAuth, useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { useUser } from '@clerk/nextjs';
+import { useEffect } from 'react';
 
-export function useUserCommunities() {
+// Hook to ensure user exists in Convex
+export function useEnsureUser() {
   const { user } = useUser();
   const { isAuthenticated } = useConvexAuth();
+  const createUser = useMutation(api.users.createUser);
+  
+  // Get existing user
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    isAuthenticated && user?.id ? { clerkId: user.id } : 'skip'
+  );
+
+  useEffect(() => {
+    if (isAuthenticated && user && !convexUser) {
+      // Create user in Convex if they don't exist
+      createUser({
+        clerkId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        username: user.username || user.firstName || 'user',
+        displayName: user.fullName || user.firstName || 'User',
+        avatarUrl: user.imageUrl,
+      });
+    }
+  }, [isAuthenticated, user, convexUser, createUser]);
+
+  return {
+    convexUser,
+    isLoading: convexUser === undefined && isAuthenticated,
+  };
+}
+
+export function useUserCommunities() {
+  const { convexUser, isLoading: userLoading } = useEnsureUser();
   
   const communities = useQuery(
     api.communities.getUserCommunities,
-    isAuthenticated && user?.id ? { userId: user.id } : 'skip'
+    convexUser?._id ? { userId: convexUser._id } : 'skip'
   );
 
   return {
     communities: communities || [],
-    isLoading: communities === undefined,
+    isLoading: communities === undefined || userLoading,
+    convexUser,
   };
 }
 
@@ -48,42 +80,32 @@ export function useCommunityChannels(communityId?: string) {
 }
 
 export function useUserFriends() {
-  const { user } = useUser();
-  const { isAuthenticated } = useConvexAuth();
-  
-  const userRecord = useQuery(
-    api.users.getUserByExternalId,
-    isAuthenticated && user?.id ? { externalId: user.id } : 'skip'
-  );
+  const { convexUser, isLoading: userLoading } = useEnsureUser();
 
   const friends = useQuery(
-    api.friendships.getFriends,
-    isAuthenticated && userRecord?._id ? { userId: userRecord._id } : 'skip'
+    api.friends.getFriends,
+    convexUser?._id ? { userId: convexUser._id } : 'skip'
   );
 
   return {
     friends: friends || [],
-    isLoading: friends === undefined,
+    isLoading: friends === undefined || userLoading,
+    convexUser,
   };
 }
 
 export function useUserProjects() {
-  const { user } = useUser();
-  const { isAuthenticated } = useConvexAuth();
-  
-  const userRecord = useQuery(
-    api.users.getUserByExternalId,
-    isAuthenticated && user?.id ? { externalId: user.id } : 'skip'
-  );
+  const { convexUser, isLoading: userLoading } = useEnsureUser();
 
   const projects = useQuery(
     api.projects.getUserProjects,
-    isAuthenticated && userRecord?._id ? { userId: userRecord._id } : 'skip'
+    convexUser?._id ? { userId: convexUser._id } : 'skip'
   );
 
   return {
     projects: projects || [],
-    isLoading: projects === undefined,
+    isLoading: projects === undefined || userLoading,
+    convexUser,
   };
 }
 
@@ -161,5 +183,86 @@ export function useDirectMessages() {
   return {
     conversations: conversations || [],
     isLoading: conversations === undefined,
+  };
+}
+
+// Mutation hooks for real-time features
+export function useCreateCommunity() {
+  const { convexUser } = useEnsureUser();
+  const createCommunityMutation = useMutation(api.communities.createCommunity);
+
+  return {
+    createCommunity: async (data: {
+      name: string;
+      description: string;
+      slug: string;
+      isPublic: boolean;
+      tags: string[];
+    }) => {
+      if (!convexUser?._id) throw new Error('User not found');
+      
+      return await createCommunityMutation({
+        ...data,
+        ownerId: convexUser._id,
+      });
+    },
+    isLoading: !convexUser,
+  };
+}
+
+export function useCreateProject() {
+  const { convexUser } = useEnsureUser();
+  const createProjectMutation = useMutation(api.projects.createProject);
+
+  return {
+    createProject: async (data: {
+      name: string;
+      description: string;
+      isPublic: boolean;
+      techStack: string[];
+      repository?: string;
+    }) => {
+      if (!convexUser?._id) throw new Error('User not found');
+      
+      return await createProjectMutation({
+        ...data,
+        ownerId: convexUser._id,
+        repository: data.repository || null,
+      });
+    },
+    isLoading: !convexUser,
+  };
+}
+
+export function useFriendActions() {
+  const { convexUser } = useEnsureUser();
+  const sendRequestMutation = useMutation(api.friends.sendFriendRequest);
+  const acceptRequestMutation = useMutation(api.friends.acceptFriendRequest);
+  const declineRequestMutation = useMutation(api.friends.declineFriendRequest);
+
+  return {
+    sendFriendRequest: async (targetUserId: string) => {
+      if (!convexUser?._id) throw new Error('User not found');
+      
+      return await sendRequestMutation({
+        userId: convexUser._id,
+        friendId: targetUserId,
+      });
+    },
+    acceptFriendRequest: async (requestId: string) => {
+      if (!convexUser?._id) throw new Error('User not found');
+      
+      return await acceptRequestMutation({
+        requestId,
+      });
+    },
+    declineFriendRequest: async (requestId: string) => {
+      if (!convexUser?._id) throw new Error('User not found');
+      
+      return await declineRequestMutation({
+        requestId,
+      });
+    },
+    isLoading: !convexUser,
   };
 }

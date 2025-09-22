@@ -82,6 +82,16 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
 
   return (
     <div className="h-full overflow-auto bg-slate-900">
+      {!currentProject ? (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center text-gray-400">
+            <Code className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <h2 className="text-xl font-semibold mb-2">No Project Selected</h2>
+            <p>Select a project to view its workspace</p>
+          </div>
+        </div>
+      ) : (
+        <>
       {/* Project Header */}
       <div className="bg-slate-800 border-b border-slate-700 p-6">
         <div className="max-w-7xl mx-auto">
@@ -92,35 +102,35 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
                   <Code className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl text-white">{currentProject.name}</h1>
-                  <p className="text-gray-400">{currentProject.description}</p>
+                  <h1 className="text-3xl text-white">{currentProject?.name || 'Untitled Project'}</h1>
+                  <p className="text-gray-400">{currentProject?.description || 'No description available'}</p>
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-2">
-                {currentProject.techStack.map((tech: string) => (
+                {currentProject?.techStack?.map((tech: string) => (
                   <Badge key={tech} variant="outline" className="border-slate-600 text-gray-300">
                     {tech}
                   </Badge>
-                ))}
+                )) || []}
               </div>
               
               <div className="flex items-center space-x-6 text-sm text-gray-400">
                 <span className="flex items-center">
                   <Star className="h-4 w-4 mr-1" />
-                  {currentProject.stars} stars
+                  {currentProject?.stars || 0} stars
                 </span>
                 <span className="flex items-center">
                   <Eye className="h-4 w-4 mr-1" />
-                  {currentProject.watchers} watching
+                  {currentProject?.watchers || 0} watching
                 </span>
                 <span className="flex items-center">
                   <GitBranch className="h-4 w-4 mr-1" />
-                  {currentProject.branches} branches
+                  {currentProject?.branches || 0} branches
                 </span>
                 <span className="flex items-center">
                   <GitPullRequest className="h-4 w-4 mr-1" />
-                  {currentProject.openPRs} open PRs
+                  {currentProject?.openPRs || 0} open PRs
                 </span>
               </div>
             </div>
@@ -177,7 +187,7 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Last Update</span>
-                    <span className="text-white">{currentProject.lastCommit}</span>
+                    <span className="text-white">{currentProject?.lastCommit || 'Never'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Issues</span>
@@ -296,7 +306,7 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
 
           <TabsContent value="team" className="space-y-6 mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentProject.collaborators.map((collaborator: any, index: number) => (
+              {(currentProject?.collaborators || []).map((collaborator: any, index: number) => (
                 <Card key={index} className="bg-slate-800 border-slate-700">
                   <CardContent className="p-4 text-center">
                     <Avatar className="h-16 w-16 mx-auto mb-3">
@@ -336,6 +346,8 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
           </TabsContent>
         </Tabs>
       </div>
+        </>
+      )}
     </div>
   );
 }
