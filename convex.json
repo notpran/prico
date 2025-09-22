@@ -1,7 +1,7 @@
 {
-  "functions": "convex/",
-  "generateCommonJSApi": false,
   "node": {
-    "external": ["nodegit"]
+    "external": [
+      "nodegit"
+    ]
   }
 }
