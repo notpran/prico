@@ -4,7 +4,7 @@ import { EnhancedTopNav } from './enhanced-top-nav';
 import { EnhancedFriendsPanel } from './enhanced-friends-panel';
 import { RealTimeChat } from './real-time-chat';
 import { EnhancedCommunityPanel } from './enhanced-community-panel';
-import { CollaborativeWorkspace } from './collaborative-workspace';
+import { ProjectWorkspace } from './enhanced-project-workspace';
 import { HomePanel } from './home-panel';
 import { RightSidebar } from './right-sidebar';
 
@@ -42,11 +42,8 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
     setCurrentView('communities');
   };
 
-  const handleProjectSelect = (project: any) => {
-    if (project) {
-      setSelectedProject(project.id);
-      setSelectedProjectData(project);
-    }
+  const handleProjectSelect = (projectId: string) => {
+    setSelectedProject(projectId);
     setCurrentView('projects');
   };
 
@@ -134,10 +131,12 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
         
       case 'projects':
         return (
-          <CollaborativeWorkspace 
-            onSelectProject={handleProjectSelect}
-            selectedProject={selectedProject}
-          />
+          <div className="flex-1 flex">
+            <ProjectWorkspace
+              selectedProject={selectedProject}
+              onProjectSelect={handleProjectSelect}
+            />
+          </div>
         );
         
       case 'settings':
