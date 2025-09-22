@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useUserCommunities, usePublicCommunities, useCommunityChannels } from '@/hooks/use-convex-data';
+import { useUserCommunities, usePublicCommunities, useCommunityChannels } from '@/hooks/use-api-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
