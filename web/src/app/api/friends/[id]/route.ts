@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 
 // DELETE /api/friends/[id] - Unfriend
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const { userId } = auth();
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -15,11 +16,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     // Remove from both friends lists
     await users.updateOne(
       { clerkId: userId },
-      { $pull: { friends: params.id } }
+      { $pull: { friends: id } as any }
     );
     await users.updateOne(
-      { _id: new ObjectId(params.id) },
-      { $pull: { friends: userId } }
+      { _id: new ObjectId(id) },
+      { $pull: { friends: userId } as any }
     );
 
     return NextResponse.json({ success: true });

@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 
 // GET /api/channels/[channelId]/messages?before=<messageId>&limit=50 - Get messages with pagination
-export async function GET(request: NextRequest, { params }: { params: { channelId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ channelId: string }> }) {
+  const { channelId } = await params;
   try {
     const { searchParams } = new URL(request.url);
     const before = searchParams.get('before');
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { channelI
     const db = await connectToDatabase();
     const messages = db.collection('messages');
 
-    let query: any = { channelId: params.channelId };
+    let query: any = { channelId };
     if (before) {
       query._id = { $lt: new ObjectId(before) };
     }

@@ -29,14 +29,14 @@ export async function POST(request: NextRequest) {
       { clerkId: userId },
       {
         $addToSet: { friends: fromUserId },
-        $pull: { friendRequestsReceived: fromUserId }
+        $pull: { friendRequestsReceived: fromUserId } as any
       }
     );
     await users.updateOne(
       { _id: new ObjectId(fromUserId) },
       {
         $addToSet: { friends: userId },
-        $pull: { friendRequestsSent: userId }
+        $pull: { friendRequestsSent: userId } as any
       }
     );
 

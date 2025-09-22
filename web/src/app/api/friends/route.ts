@@ -1,19 +1,15 @@
-import { auth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '../../../lib/mongo';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '../../../lib/auth-middleware';
+import { connectToDatabase } from '../../../lib/mongo';
 import { ObjectId } from 'mongodb';
 
 // GET /api/friends - Get user's friends
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const { userId } = auth();
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await requireAuth(request);
 
     const db = await connectToDatabase();
     const users = db.collection('users');
-
-    const user = await users.findOne({ clerkId: userId });
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     // Get friend details
     const friends = await users.find({ _id: { $in: user.friends.map((id: string) => new ObjectId(id)) } }).toArray();
@@ -28,8 +24,7 @@ export async function GET() {
 // POST /api/friends/request - Send friend request
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = auth();
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const user = await requireAuth(request);
 
     const db = await connectToDatabase();
     const users = db.collection('users');
@@ -44,12 +39,12 @@ export async function POST(request: NextRequest) {
 
     // Add to sent and received
     await users.updateOne(
-      { clerkId: userId },
+      { _id: user._id },
       { $addToSet: { friendRequestsSent: toUserId } }
     );
     await users.updateOne(
       { _id: new ObjectId(toUserId) },
-      { $addToSet: { friendRequestsReceived: userId } }
+      { $addToSet: { friendRequestsReceived: user._id.toString() } }
     );
 
     return NextResponse.json({ success: true });

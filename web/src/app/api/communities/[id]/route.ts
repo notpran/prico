@@ -3,18 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 
 // GET /api/communities/[id] - Get community details + channels
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const db = await connectToDatabase();
     const communities = db.collection('communities');
     const channels = db.collection('channels');
 
-    const community = await communities.findOne({ _id: new ObjectId(params.id) });
+    const community = await communities.findOne({ _id: new ObjectId(id) });
     if (!community) {
       return NextResponse.json({ error: 'Community not found' }, { status: 404 });
     }
 
-    const communityChannels = await channels.find({ communityId: params.id }).toArray();
+    const communityChannels = await channels.find({ communityId: id }).toArray();
 
     return NextResponse.json({ ...community, channels: communityChannels });
   } catch (error) {

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     if (communityId) {
       await communities.updateOne(
         { _id: new ObjectId(communityId) },
-        { $push: { channels: result.insertedId.toString() } }
+        { $push: { channels: result.insertedId.toString() } as any }
       );
     }
 
