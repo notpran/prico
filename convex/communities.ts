@@ -236,3 +236,16 @@ export const getCommunity = query({
     };
   },
 });
+
+// Get community channels (separate function for better caching)
+export const getCommunityChannels = query({
+  args: { communityId: v.id("communities") },
+  handler: async (ctx, args) => {
+    const channels = await ctx.db
+      .query("channels")
+      .withIndex("by_community", (q) => q.eq("communityId", args.communityId))
+      .collect();
+
+    return channels.sort((a, b) => a.position - b.position);
+  },
+});
