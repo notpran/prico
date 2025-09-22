@@ -21,86 +21,11 @@ interface HomePanelProps {
 }
 
 export function HomePanel({ user, onProjectSelect, onChatSelect }: HomePanelProps) {
-  const recentChats = [
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      lastMessage: 'Can you review my React component?',
-      time: '2 min ago',
-      unread: 2
-    },
-    {
-      id: '2',
-      name: 'Dev Team',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=team',
-      lastMessage: 'New deployment is ready for testing',
-      time: '15 min ago',
-      unread: 0
-    },
-    {
-      id: '3',
-      name: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      lastMessage: 'Great work on the API integration!',
-      time: '1 hour ago',
-      unread: 1
-    }
-  ];
+  const recentChats: any[] = [];
 
-  const recentProjects = [
-    {
-      id: '1',
-      name: 'E-commerce Platform',
-      description: 'Full-stack React + Node.js application',
-      techStack: ['React', 'Node.js', 'PostgreSQL'],
-      lastCommit: '2 hours ago',
-      status: 'In Progress',
-      collaborators: 4,
-      stars: 12
-    },
-    {
-      id: '2',
-      name: 'Chat Application',
-      description: 'Real-time messaging app with WebSocket',
-      techStack: ['Vue.js', 'Socket.io', 'MongoDB'],
-      lastCommit: '1 day ago',
-      status: 'Review',
-      collaborators: 2,
-      stars: 8
-    },
-    {
-      id: '3',
-      name: 'AI Dashboard',
-      description: 'Analytics dashboard with ML insights',
-      techStack: ['Python', 'FastAPI', 'React'],
-      lastCommit: '3 days ago',
-      status: 'Complete',
-      collaborators: 6,
-      stars: 23
-    }
-  ];
+  const recentProjects: any[] = [];
 
-  const pendingPullRequests = [
-    {
-      id: '1',
-      title: 'Add user authentication system',
-      project: 'E-commerce Platform',
-      author: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      status: 'Open',
-      changes: '+127 -45'
-    },
-    {
-      id: '2',
-      title: 'Fix responsive design issues',
-      project: 'Chat Application',
-      author: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      status: 'Review',
-      changes: '+23 -12'
-    }
-  ];
+  const pendingPullRequests: any[] = [];
 
   return (
     <div className="h-full overflow-auto bg-slate-900 p-6">
@@ -189,7 +114,7 @@ export function HomePanel({ user, onProjectSelect, onChatSelect }: HomePanelProp
                   </div>
                   
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {project.techStack.map((tech) => (
+                    {project.techStack?.map((tech: string) => (
                       <Badge key={tech} variant="outline" className="text-xs border-slate-600 text-gray-300">
                         {tech}
                       </Badge>
@@ -241,7 +166,7 @@ export function HomePanel({ user, onProjectSelect, onChatSelect }: HomePanelProp
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={pr.avatar} alt={pr.author} />
                   <AvatarFallback className="bg-purple-600 text-white text-xs">
-                    {pr.author.split(' ').map(n => n[0]).join('')}
+                    {pr.author?.split(' ').map((n: string) => n[0]).join('') || ''}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

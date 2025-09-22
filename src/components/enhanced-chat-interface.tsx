@@ -20,60 +20,13 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
   const [selectedChannel, setSelectedChannel] = useState<any>(null);
-  const [members, setMembers] = useState([
-    { 
-      id: '1', 
-      name: 'Alice Johnson', 
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alice', 
-      status: 'online',
-      role: 'Admin'
-    },
-    { 
-      id: '2', 
-      name: 'Bob Smith', 
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=bob', 
-      status: 'away',
-      role: 'Member'
-    },
-    { 
-      id: '3', 
-      name: 'Charlie Brown', 
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=charlie', 
-      status: 'offline',
-      role: 'Member'
-    },
-  ]);
+  const [members, setMembers] = useState<any[]>([]);
 
   // Community data - dynamically determined from selectedChat
   const communityData = {
     id: selectedChat?.id || selectedChat?.communityId || 'general',
     name: selectedChat?.name || selectedChat?.communityName || 'General Chat',
-    channels: selectedChat?.channels || [
-      { 
-        id: 'general', 
-        name: 'general', 
-        type: 'text' as const,
-        description: 'General discussion'
-      },
-      { 
-        id: 'random', 
-        name: 'random', 
-        type: 'text' as const,
-        description: 'Random conversations'
-      },
-      { 
-        id: 'dev-chat', 
-        name: 'dev-chat', 
-        type: 'text' as const,
-        description: 'Development discussions'
-      },
-      { 
-        id: 'voice-general', 
-        name: 'General Voice', 
-        type: 'voice' as const,
-        description: 'General voice channel'
-      },
-    ]
+    channels: selectedChat?.channels || []
   };
 
   useEffect(() => {

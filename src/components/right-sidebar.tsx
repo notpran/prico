@@ -19,68 +19,11 @@ interface RightSidebarProps {
 }
 
 export function RightSidebar({ user, currentView }: RightSidebarProps) {
-  const activeCollaborators = [
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      status: 'online',
-      activity: 'Editing UserAuth.tsx',
-      project: 'E-commerce Platform'
-    },
-    {
-      id: '2',
-      name: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      status: 'online',
-      activity: 'Reviewing pull request',
-      project: 'Chat Application'
-    },
-    {
-      id: '3',
-      name: 'Emily Rodriguez',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
-      status: 'away',
-      activity: 'In a meeting',
-      project: 'AI Dashboard'
-    }
-  ];
+  const activeCollaborators: any[] = [];
 
-  const liveSessions = [
-    {
-      id: '1',
-      name: 'Frontend Team Sync',
-      participants: 4,
-      project: 'E-commerce Platform',
-      duration: '45 min',
-      type: 'coding'
-    },
-    {
-      id: '2',
-      name: 'Code Review Session',
-      participants: 2,
-      project: 'Chat Application',
-      duration: '20 min',
-      type: 'review'
-    }
-  ];
+  const liveSessions: any[] = [];
 
-  const upcomingEvents = [
-    {
-      id: '1',
-      title: 'Sprint Planning',
-      time: '2:00 PM',
-      participants: 6,
-      type: 'meeting'
-    },
-    {
-      id: '2',
-      title: 'Code Review',
-      time: '4:30 PM',
-      participants: 3,
-      type: 'review'
-    }
-  ];
+  const upcomingEvents: any[] = [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

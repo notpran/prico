@@ -30,36 +30,12 @@ export function EnhancedFriendsPanel({ onSelectDM, selectedConversation }: Enhan
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('dms');
 
-  // Friend data - in production this will be loaded from Convex database
-  const friends = [
-    {
-      _id: '1',
-      displayName: 'Alice Johnson',
-      username: 'alice',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alice',
-      status: 'online',
-      customStatus: 'Building something amazing! 🚀',
-      mutualFriends: 5
-    },
-    {
-      _id: '2',
-      displayName: 'Bob Smith',
-      username: 'bob',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=bob',
-      status: 'away',
-      customStatus: 'In a coding session',
-      mutualFriends: 3
-    },
-    {
-      _id: '3',
-      displayName: 'Charlie Brown',
-      username: 'charlie',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=charlie',
-      status: 'offline',
-      customStatus: null,
-      mutualFriends: 8
-    }
-  ];
+    // Friend data - in production this will be loaded from Convex database
+  const friends: any[] = [];
+
+  const directMessageConversations: any[] = [];
+
+  const formatLastMessageTime = (timestamp: number) => {
 
   const directMessageConversations = [
     {
@@ -86,18 +62,7 @@ export function EnhancedFriendsPanel({ onSelectDM, selectedConversation }: Enhan
     }
   ];
 
-  const pendingRequests = [
-    {
-      _id: 'req1',
-      requester: {
-        _id: '4',
-        displayName: 'Diana Prince',
-        username: 'diana',
-        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=diana'
-      },
-      createdAt: Date.now() - 7200000
-    }
-  ];
+  const pendingRequests: any[] = [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

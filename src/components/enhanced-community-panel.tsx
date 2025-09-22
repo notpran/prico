@@ -95,105 +95,10 @@ export function EnhancedCommunityPanel({
   const { communities: convexPublicCommunities, isLoading: loadingPublicCommunities } = usePublicCommunities();
   const { channels: convexChannels, isLoading: loadingChannels } = useCommunityChannels(selectedCommunityData?.id);
 
-  // Use Convex data when available, otherwise fallback to static data
-  const myCommunities = convexUserCommunities.length > 0 ? convexUserCommunities : [
-    {
-      id: '1',
-      name: 'React Developers',
-      description: 'A community for React developers to share knowledge and collaborate',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=React',
-      memberCount: 1247,
-      isPublic: true,
-      tags: ['React', 'JavaScript', 'Frontend'],
-      owner: { id: 'user1', name: 'John Doe', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john' },
-      role: 'admin',
-      unreadCount: 3,
-      lastActivity: '5 minutes ago'
-    },
-    {
-      id: '2',
-      name: 'Design Systems',
-      description: 'Building scalable design systems for modern applications',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Design',
-      memberCount: 892,
-      isPublic: true,
-      tags: ['Design', 'UI/UX', 'Components'],
-      owner: { id: 'user2', name: 'Sarah Wilson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah' },
-      role: 'member',
-      unreadCount: 0,
-      lastActivity: '2 hours ago'
-    },
-    {
-      id: '3',
-      name: 'Startup Founders',
-      description: 'Private community for startup founders and entrepreneurs',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Startup',
-      memberCount: 156,
-      isPublic: false,
-      tags: ['Startup', 'Business', 'Entrepreneurship'],
-      owner: { id: 'user3', name: 'Mike Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mike' },
-      role: 'member',
-      unreadCount: 7,
-      lastActivity: '1 hour ago'
-    }
-  ];
-
-  const publicCommunities = convexPublicCommunities.length > 0 ? convexPublicCommunities : [
-    {
-      id: '4',
-      name: 'Open Source Lovers',
-      description: 'Contributing to open source projects and sharing experiences',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=OSS',
-      memberCount: 2341,
-      isPublic: true,
-      tags: ['Open Source', 'Git', 'Collaboration'],
-      owner: { id: 'user4', name: 'Alex Turner', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex' },
-      lastActivity: '10 minutes ago'
-    },
-    {
-      id: '5',
-      name: 'AI & Machine Learning',
-      description: 'Discussing the latest in AI, ML, and data science',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=AI',
-      memberCount: 3567,
-      isPublic: true,
-      tags: ['AI', 'Machine Learning', 'Python'],
-      owner: { id: 'user5', name: 'Dr. Emma Davis', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emma' },
-      lastActivity: '30 minutes ago'
-    }
-  ];
-
-    const channels = convexChannels.length > 0 ? convexChannels : [
-    {
-      id: "1",
-      name: "general",
-      type: "text",
-      communityId: "1",
-      isNsfw: false,
-      topic: "General discussion",
-      createdAt: new Date().toISOString(),
-      createdBy: "user-id-1"
-    },
-    {
-      id: "2", 
-      name: "announcements",
-      type: "announcement",
-      communityId: "1",
-      isNsfw: false,
-      topic: "Important announcements",
-      createdAt: new Date().toISOString(),
-      createdBy: "user-id-1"
-    },
-    {
-      id: "3",
-      name: "Voice Chat",
-      type: "voice",
-      communityId: "1", 
-      isNsfw: false,
-      createdAt: new Date().toISOString(),
-      createdBy: "user-id-1"
-    }
-  ] as Channel[];
+  // Use only real Convex data - no fallbacks
+  const myCommunities = convexUserCommunities || [];
+  const publicCommunities = convexPublicCommunities || [];
+  const channels = convexChannels || [];
 
   const getChannelIcon = (type: string) => {
     switch (type) {

@@ -3,50 +3,7 @@ import { motion } from 'framer-motion';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 
 export function FloatingAvatars() {
-  const avatars = [
-    {
-      name: 'Sarah Chen',
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      initials: 'SC',
-      position: { top: '20%', left: '15%' },
-      delay: 0
-    },
-    {
-      name: 'Alex Johnson',
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      initials: 'AJ',
-      position: { top: '30%', right: '20%' },
-      delay: 1
-    },
-    {
-      name: 'Emily Rodriguez',
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
-      initials: 'ER',
-      position: { top: '60%', left: '10%' },
-      delay: 2
-    },
-    {
-      name: 'David Kim',
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=david',
-      initials: 'DK',
-      position: { top: '70%', right: '15%' },
-      delay: 3
-    },
-    {
-      name: 'Lisa Wang',
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisa',
-      initials: 'LW',
-      position: { top: '40%', left: '85%' },
-      delay: 4
-    },
-    {
-      name: 'Tom Wilson',
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tom',
-      initials: 'TW',
-      position: { top: '80%', left: '80%' },
-      delay: 5
-    }
-  ];
+  const avatars: any[] = [];
 
   return (
     <div className="fixed inset-0 z-5 pointer-events-none overflow-hidden">

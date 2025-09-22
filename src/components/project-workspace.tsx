@@ -30,119 +30,15 @@ interface ProjectWorkspaceProps {
 export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProps) {
   const [activeTab, setActiveTab] = useState('overview');
 
-  const projects = [
-    {
-      id: '1',
-      name: 'E-commerce Platform',
-      description: 'Full-stack React + Node.js application with payment integration',
-      techStack: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-      lastCommit: '2 hours ago',
-      status: 'In Progress',
-      collaborators: [
-        { name: 'Sarah Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah' },
-        { name: 'Alex Johnson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex' },
-        { name: 'Emily Rodriguez', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily' }
-      ],
-      stars: 12,
-      watchers: 8,
-      branches: 4,
-      openPRs: 2
-    },
-    {
-      id: '2',
-      name: 'Chat Application',
-      description: 'Real-time messaging app with WebSocket integration',
-      techStack: ['Vue.js', 'Socket.io', 'MongoDB', 'Express'],
-      lastCommit: '1 day ago',
-      status: 'Review',
-      collaborators: [
-        { name: 'David Kim', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=david' },
-        { name: 'Lisa Wang', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisa' }
-      ],
-      stars: 8,
-      watchers: 5,
-      branches: 2,
-      openPRs: 1
-    }
-  ];
+  const projects: any[] = [];
 
-  const pullRequests = [
-    {
-      id: '1',
-      title: 'Add user authentication system',
-      author: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      status: 'open',
-      branch: 'feature/auth-system',
-      changes: '+127 -45',
-      createdAt: '2 days ago',
-      comments: 5,
-      checks: 'passing'
-    },
-    {
-      id: '2',
-      title: 'Fix responsive design issues',
-      author: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      status: 'review',
-      branch: 'fix/responsive-design',
-      changes: '+23 -12',
-      createdAt: '1 day ago',
-      comments: 2,
-      checks: 'pending'
-    },
-    {
-      id: '3',
-      title: 'Update dependencies and security patches',
-      author: 'Emily Rodriguez',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
-      status: 'merged',
-      branch: 'chore/update-deps',
-      changes: '+45 -67',
-      createdAt: '3 days ago',
-      comments: 3,
-      checks: 'passed'
-    }
-  ];
+  const pullRequests: any[] = [];
 
-  const codeFiles = [
-    { name: 'src/components/UserAuth.tsx', path: '/src/components/', type: 'tsx' },
-    { name: 'src/pages/Dashboard.tsx', path: '/src/pages/', type: 'tsx' },
-    { name: 'src/utils/api.ts', path: '/src/utils/', type: 'ts' },
-    { name: 'src/styles/globals.css', path: '/src/styles/', type: 'css' },
-    { name: 'package.json', path: '/', type: 'json' }
-  ];
+  const codeFiles: any[] = [];
 
-  const currentProject = selectedProject || projects[0];
-  
-  // Ensure required properties exist for projects
-  if (currentProject && !currentProject.collaborators) {
-    currentProject.collaborators = [
-      { name: user.name, avatar: user.avatar },
-      { name: 'Sarah Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah' },
-      { name: 'Alex Johnson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex' }
-    ];
-  }
-  
-  if (currentProject && !currentProject.techStack) {
-    currentProject.techStack = ['React', 'TypeScript', 'Node.js'];
-  }
-  
-  if (currentProject && !currentProject.stars) {
-    currentProject.stars = 15;
-  }
-  
-  if (currentProject && !currentProject.watchers) {
-    currentProject.watchers = 8;
-  }
-  
-  if (currentProject && !currentProject.branches) {
-    currentProject.branches = 3;
-  }
-  
-  if (currentProject && !currentProject.openPRs) {
-    currentProject.openPRs = 2;
-  }
+  const currentProject = selectedProject || null;
+
+  const getFileIcon = (type: string) => {
   
   if (currentProject && !currentProject.lastCommit) {
     currentProject.lastCommit = '2 hours ago';
@@ -287,45 +183,8 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
                   <CardTitle className="text-white">Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 border border-slate-600 rounded-lg">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=sarah" />
-                        <AvatarFallback>SC</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="text-white text-sm">
-                          <span className="font-medium">Sarah Chen</span> opened pull request #12
-                        </p>
-                        <p className="text-gray-400 text-xs">2 hours ago</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border border-slate-600 rounded-lg">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=alex" />
-                        <AvatarFallback>AJ</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="text-white text-sm">
-                          <span className="font-medium">Alex Johnson</span> merged pull request #11
-                        </p>
-                        <p className="text-gray-400 text-xs">1 day ago</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border border-slate-600 rounded-lg">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=emily" />
-                        <AvatarFallback>ER</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="text-white text-sm">
-                          <span className="font-medium">Emily Rodriguez</span> pushed 3 commits
-                        </p>
-                        <p className="text-gray-400 text-xs">2 days ago</p>
-                      </div>
-                    </div>
+                  <div className="text-center text-gray-400 py-8">
+                    No activity to display
                   </div>
                 </CardContent>
               </Card>
@@ -375,7 +234,7 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={pr.avatar} alt={pr.author} />
                           <AvatarFallback className="bg-indigo-600 text-white">
-                            {pr.author.split(' ').map(n => n[0]).join('')}
+                            {pr.author.split(' ').map((n: string) => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                         <div>

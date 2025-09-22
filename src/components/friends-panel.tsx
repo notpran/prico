@@ -22,94 +22,11 @@ interface FriendsPanelProps {
 export function FriendsPanel({ user }: FriendsPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const friends = [
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      username: '@sarah_dev',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      status: 'online',
-      activity: 'Working on React components',
-      mutualFriends: 5,
-      lastSeen: 'Active now'
-    },
-    {
-      id: '2',
-      name: 'Alex Johnson',
-      username: '@alex_codes',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      status: 'away',
-      activity: 'In a meeting',
-      mutualFriends: 8,
-      lastSeen: '30 minutes ago'
-    },
-    {
-      id: '3',
-      name: 'Emily Rodriguez',
-      username: '@emily_ui',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
-      status: 'online',
-      activity: 'Designing new UI components',
-      mutualFriends: 3,
-      lastSeen: 'Active now'
-    },
-    {
-      id: '4',
-      name: 'David Kim',
-      username: '@david_backend',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=david',
-      status: 'offline',
-      activity: 'Last seen working on API endpoints',
-      mutualFriends: 12,
-      lastSeen: '2 hours ago'
-    }
-  ];
+  const friends: any[] = [];
 
-  const friendRequests = [
-    {
-      id: '1',
-      name: 'Jessica Park',
-      username: '@jess_fullstack',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jessica',
-      mutualFriends: 2,
-      requestDate: '2 days ago'
-    },
-    {
-      id: '2',
-      name: 'Michael Brown',
-      username: '@mike_devops',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=michael',
-      mutualFriends: 7,
-      requestDate: '1 week ago'
-    }
-  ];
+  const friendRequests: any[] = [];
 
-  const suggestions = [
-    {
-      id: '1',
-      name: 'Lisa Wang',
-      username: '@lisa_ml',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisa',
-      mutualFriends: 4,
-      reason: 'Works on similar projects'
-    },
-    {
-      id: '2',
-      name: 'Tom Wilson',
-      username: '@tom_frontend',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tom',
-      mutualFriends: 6,
-      reason: 'Common connections'
-    },
-    {
-      id: '3',
-      name: 'Anna Schmidt',
-      username: '@anna_data',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=anna',
-      mutualFriends: 2,
-      reason: 'Similar interests'
-    }
-  ];
+    const suggestions: any[] = [];
 
   const getStatusColor = (status: string) => {
     switch (status) {

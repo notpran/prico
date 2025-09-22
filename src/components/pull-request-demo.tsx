@@ -19,87 +19,12 @@ import {
 
 export function PullRequestDemo() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
 
-  const steps = [
-    {
-      title: 'Add user authentication system',
-      status: 'open',
-      author: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      branch: 'feature/auth-system',
-      commits: 3,
-      additions: 127,
-      deletions: 45,
-      comments: 0,
-      approvals: 0,
-      checks: 'pending'
-    },
-    {
-      title: 'Add user authentication system',
-      status: 'review',
-      author: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      branch: 'feature/auth-system',
-      commits: 3,
-      additions: 127,
-      deletions: 45,
-      comments: 2,
-      approvals: 1,
-      checks: 'running'
-    },
-    {
-      title: 'Add user authentication system',
-      status: 'approved',
-      author: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      branch: 'feature/auth-system',
-      commits: 3,
-      additions: 127,
-      deletions: 45,
-      comments: 3,
-      approvals: 2,
-      checks: 'passed'
-    },
-    {
-      title: 'Add user authentication system',
-      status: 'merged',
-      author: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      branch: 'feature/auth-system',
-      commits: 3,
-      additions: 127,
-      deletions: 45,
-      comments: 4,
-      approvals: 2,
-      checks: 'passed'
-    }
-  ];
+  const steps: any[] = [];
 
-  const reviewComments = [
-    {
-      user: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      comment: 'Great work on the validation logic! Just one small suggestion on error handling.',
-      time: '2 hours ago',
-      line: 42
-    },
-    {
-      user: 'Emily Rodriguez',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
-      comment: 'LGTM! The token expiration handling is perfect 👍',
-      time: '1 hour ago',
-      line: null
-    },
-    {
-      user: 'David Kim',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=david',
-      comment: 'Approved! Ready to merge once CI passes.',
-      time: '30 min ago',
-      line: null
-    }
-  ];
+  const reviewComments: any[] = [];
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -111,7 +36,7 @@ export function PullRequestDemo() {
     return () => clearInterval(timer);
   }, [isAutoPlaying, steps.length]);
 
-  const currentPR = steps[currentStep];
+  const currentPR = steps[currentStep] || null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -185,7 +110,7 @@ export function PullRequestDemo() {
           <Avatar className="h-12 w-12 border-2 border-blue-500/50 neon-glow-blue">
             <AvatarImage src={currentPR.avatar} alt={currentPR.author} />
             <AvatarFallback className="bg-blue-600 text-white font-orbitron">
-              {currentPR.author.split(' ').map(n => n[0]).join('')}
+              {currentPR?.author?.split(' ').map((n: string) => n[0]).join('') || ''}
             </AvatarFallback>
           </Avatar>
           
@@ -349,7 +274,7 @@ export function PullRequestDemo() {
                   <Avatar className="h-8 w-8 border-2 border-blue-500/30">
                     <AvatarImage src={comment.avatar} alt={comment.user} />
                     <AvatarFallback className="bg-blue-600 text-white text-xs font-orbitron">
-                      {comment.user.split(' ').map(n => n[0]).join('')}
+                      {comment.user.split(' ').map((n: string) => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-1">

@@ -53,7 +53,7 @@ export function AdvancedLandingPage({ onGetStarted, onLogin, onDemo }: AdvancedL
 
   const notifications = [
     { id: 1, text: "🚀 Pull request merged in React App", time: "2m ago" },
-    { id: 2, text: "👋 Sarah Chen is now online", time: "5m ago" },
+    { id: 2, text: "👋 User is now online", time: "5m ago" },
     { id: 3, text: "💬 New message in Dev Team chat", time: "8m ago" }
   ];
 

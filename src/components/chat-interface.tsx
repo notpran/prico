@@ -8,6 +8,7 @@ import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { ScrollArea } from './ui/scroll-area';
 import { RealtimeChat } from './realtime-chat';
+import { TypingIndicator } from './typing-indicator';
 import { 
   Hash,
   Volume2,
@@ -15,7 +16,15 @@ import {
   UserPlus,
   Search,
   MoreVertical,
-  Users
+  Users,
+  Circle,
+  Phone,
+  Video,
+  Code,
+  Paperclip,
+  Smile,
+  Send,
+  Zap
 } from 'lucide-react';
 
 interface ChatInterfaceProps {
@@ -26,91 +35,8 @@ interface ChatInterfaceProps {
 export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      sender: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      content: 'Hey! Can you take a look at this React component I\'m working on?',
-      timestamp: '10:30 AM',
-      isOwn: false,
-      type: 'text'
-    },
-    {
-      id: '2',
-      sender: 'You',
-      avatar: user.avatar,
-      content: 'Sure! Share the code snippet.',
-      timestamp: '10:31 AM',
-      isOwn: true,
-      type: 'text'
-    },
-    {
-      id: '3',
-      sender: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      content: `const UserCard = ({ user }) => {
-  return (
-    <div className="user-card">
-      <img src={user.avatar} alt={user.name} />
-      <h3>{user.name}</h3>
-      <p>{user.role}</p>
-    </div>
-  );
-};`,
-      timestamp: '10:32 AM',
-      isOwn: false,
-      type: 'code'
-    },
-    {
-      id: '4',
-      sender: 'You',
-      avatar: user.avatar,
-      content: 'Looks good! You might want to add some error handling for the avatar image.',
-      timestamp: '10:33 AM',
-      isOwn: true,
-      type: 'text'
-    }
-  ]);
-
-  const [conversations] = useState([
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      lastMessage: 'Can you review my React component?',
-      time: '2 min ago',
-      unread: 2,
-      status: 'online'
-    },
-    {
-      id: '2',
-      name: 'Dev Team',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=team',
-      lastMessage: 'New deployment is ready for testing',
-      time: '15 min ago',
-      unread: 0,
-      status: 'online'
-    },
-    {
-      id: '3',
-      name: 'Alex Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-      lastMessage: 'Great work on the API integration!',
-      time: '1 hour ago',
-      unread: 1,
-      status: 'away'
-    },
-    {
-      id: '4',
-      name: 'Project Alpha',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alpha',
-      lastMessage: 'Meeting rescheduled to tomorrow',
-      time: '2 hours ago',
-      unread: 0,
-      status: 'offline'
-    }
-  ]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [conversations] = useState<any[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -314,7 +240,7 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex justify-start"
               >
-                <TypingIndicator userName="Sarah Chen" />
+                <TypingIndicator userName="" />
               </motion.div>
             )}
           </AnimatePresence>
