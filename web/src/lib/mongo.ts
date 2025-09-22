@@ -5,14 +5,6 @@ const client = new MongoClient(uri);
 
 let db: Db;
 
-import { MongoClient, Db } from 'mongodb';
-import { userIndexes } from './models/user';
-
-const uri = process.env.MONGODB_URI!;
-const client = new MongoClient(uri);
-
-let db: Db;
-
 export async function connectToDatabase(): Promise<Db> {
   if (!db) {
     await client.connect();
@@ -20,14 +12,6 @@ export async function connectToDatabase(): Promise<Db> {
     await createIndexes(db);
   }
   return db;
-}
-
-async function createIndexes(db: Db) {
-  const users = db.collection('users');
-  for (const index of userIndexes) {
-    await users.createIndex(index.key, index.options);
-  }
-  // Add other collections' indexes here as they are created
 }
 
 async function createIndexes(db: Db) {
