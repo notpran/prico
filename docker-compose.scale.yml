@@ -1,0 +1,146 @@
+version: '3.8'
+
+services:
+  # Load balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./infra/ssl:/etc/ssl/certs
+    depends_on:
+      - web1
+      - web2
+      - socket1
+      - socket2
+    restart: unless-stopped
+
+  # Multiple web instances
+  web1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - NEXT_PUBLIC_SOCKET_URL=http://socket1:3001
+      - REDIS_URL=redis://redis:6379
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - API_KEY=${API_KEY}
+    depends_on:
+      - redis
+      - mongo
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  web2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - NEXT_PUBLIC_SOCKET_URL=http://socket2:3001
+      - REDIS_URL=redis://redis:6379
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - API_KEY=${API_KEY}
+    depends_on:
+      - redis
+      - mongo
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  # Multiple socket instances
+  socket1:
+    build:
+      context: ./server/socket-server
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://redis:6379
+      - SOCKET_SECRET=${SOCKET_SECRET}
+    depends_on:
+      - redis
+      - mongo
+    restart: unless-stopped
+
+  socket2:
+    build:
+      context: ./server/socket-server
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://redis:6379
+      - SOCKET_SECRET=${SOCKET_SECRET}
+    depends_on:
+      - redis
+      - mongo
+    restart: unless-stopped
+
+  # Y-WebSocket instances
+  yws1:
+    build:
+      context: ./server/y-websocket
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+  yws2:
+    build:
+      context: ./server/y-websocket
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+  # Shared services
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  mongo:
+    image: mongo:7
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3004:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  mongo-data:
+  grafana-data:
