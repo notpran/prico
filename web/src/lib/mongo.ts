@@ -18,7 +18,9 @@ async function createIndexes(db: Db) {
   // Users indexes
   const users = db.collection('users');
   await users.createIndex({ username: 1 }, { unique: true });
-  await users.createIndex({ clerkId: 1 }, { unique: true });
+  await users.createIndex({ email: 1 }, { unique: true });
+  await users.createIndex({ githubId: 1 }, { unique: true, sparse: true });
+  await users.createIndex({ googleId: 1 }, { unique: true, sparse: true });
 
   // Communities indexes
   const communities = db.collection('communities');

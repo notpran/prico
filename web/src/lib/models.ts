@@ -1,25 +1,28 @@
 // src/lib/models.ts - TypeScript interfaces for MongoDB collections
 
 export interface User {
-  _id: string; // ObjectId as string
-  clerkId: string;
-  username: string;
-  displayName: string;
+  _id?: string;
   email: string;
-  about?: string;
-  badges: string[];
-  avatarUrl?: string;
-  age?: number;
+  username: string;
+  displayName?: string;
+  password?: string; // Only for email/password auth
+  age: number;
+  avatar?: string;
+  githubId?: string;
+  googleId?: string;
   createdAt: Date;
-  lastActiveAt?: Date;
-  friends: string[]; // ObjectId strings
+  lastActiveAt: Date;
+  friends: string[]; // Array of user IDs
   friendRequestsSent: string[];
   friendRequestsReceived: string[];
   communityIds: string[];
   projectIds: string[];
   settings: {
     showPublicCommunities: boolean;
-    notifications: { email: boolean; push: boolean; };
+    notifications: {
+      email: boolean;
+      push: boolean;
+    };
   };
 }
 
