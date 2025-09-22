@@ -13,9 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { useUserProjects, usePublicProjects, useProject, useProjectFiles } from '../hooks/use-convex-data';
-import { useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { useUserProjects, usePublicProjects, useProject, useProjectFiles } from '../hooks/use-api-data';
+import { apiClient } from '@/lib/api';
 import { 
   Folder, 
   File, 
@@ -104,16 +103,9 @@ export function ProjectWorkspace({ selectedProject, onProjectSelect }: ProjectWo
 
   // Hooks
   const { projects: userProjects, isLoading: userProjectsLoading } = useUserProjects();
-  const { projects: publicProjects, isLoading: publicProjectsLoading } = usePublicProjects({
-    search: searchQuery,
-    limit: 20
-  });
-  const { project: currentProject } = useProject(selectedProject);
-  const { files: projectFiles } = useProjectFiles(selectedProject);
-
-  // Mutations
-  const createProject = useMutation(api.projects.createProject);
-  const saveFile = useMutation(api.projects.saveProjectFile);
+  const { projects: publicProjects, isLoading: publicProjectsLoading } = usePublicProjects();
+  const { data: currentProject, isLoading: projectLoading } = useProject(selectedProject || '');
+  const { files: projectFiles, isLoading: filesLoading } = useProjectFiles(selectedProject || '');
 
   // Build file tree from flat file list
   useEffect(() => {
@@ -186,16 +178,11 @@ export function ProjectWorkspace({ selectedProject, onProjectSelect }: ProjectWo
     if (!user) return;
 
     try {
-      const userRecord = user; // Assuming we have user record
-      await createProject({
+      await apiClient.createProject({
         name: newProject.name,
         description: newProject.description,
-        slug: newProject.slug,
-        ownerId: userRecord.id as any, // Type assertion for demo
         isPublic: newProject.isPublic,
-        technology: newProject.technology,
-        language: newProject.language,
-        framework: newProject.framework
+        techStack: [newProject.technology, newProject.language, newProject.framework].filter(Boolean),
       });
 
       setIsCreateDialogOpen(false);
@@ -274,7 +261,7 @@ export function ProjectWorkspace({ selectedProject, onProjectSelect }: ProjectWo
               // Load file content here
               const file = projectFiles?.find((f: any) => f.path === node.path);
               if (file) {
-                setFileContent(file.content);
+                setFileContent((file as any).content);
               }
             }
           }}
@@ -320,8 +307,8 @@ export function ProjectWorkspace({ selectedProject, onProjectSelect }: ProjectWo
         {/* File Explorer */}
         <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
           <div className="p-3 border-b border-slate-700">
-            <h3 className="font-semibold text-white">{currentProject.name}</h3>
-            <p className="text-xs text-gray-400 truncate">{currentProject.description}</p>
+            <h3 className="font-semibold text-white">{(currentProject as any)?.name}</h3>
+            <p className="text-xs text-gray-400 truncate">{(currentProject as any)?.description}</p>
           </div>
           
           <div className="p-2 border-b border-slate-700">
@@ -361,7 +348,7 @@ export function ProjectWorkspace({ selectedProject, onProjectSelect }: ProjectWo
                     {selectedFile.split('/').pop()}
                   </span>
                   <Badge variant="secondary" className="text-xs">
-                    {projectFiles?.find((f: any) => f.path === selectedFile)?.language}
+                    {(projectFiles?.find((f: any) => f.path === selectedFile) as any)?.language}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">

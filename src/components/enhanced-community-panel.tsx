@@ -93,15 +93,15 @@ export function EnhancedCommunityPanel({
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [showJoinCommunity, setShowJoinCommunity] = useState(false);
 
-  // Use real Convex data
-  const { communities: convexUserCommunities, isLoading: loadingUserCommunities } = useUserCommunities();
-  const { communities: convexPublicCommunities, isLoading: loadingPublicCommunities } = usePublicCommunities();
-  const { channels: convexChannels, isLoading: loadingChannels } = useCommunityChannels(selectedCommunityData?._id || selectedCommunityData?.id);
+  // Use real API data
+  const { communities: apiUserCommunities, isLoading: loadingUserCommunities } = useUserCommunities();
+  const { communities: apiPublicCommunities, isLoading: loadingPublicCommunities } = usePublicCommunities();
+  const { channels: apiChannels, isLoading: loadingChannels } = useCommunityChannels(selectedCommunityData?.id || '');
 
-  // Use only real Convex data - no fallbacks
-  const myCommunities = convexUserCommunities || [];
-  const publicCommunities = convexPublicCommunities || [];
-  const channels = convexChannels || [];
+  // Use only real API data - no fallbacks
+  const myCommunities = apiUserCommunities || [];
+  const publicCommunities = apiPublicCommunities || [];
+  const channels = apiChannels || [];
 
   const getChannelIcon = (type: string) => {
     switch (type) {
