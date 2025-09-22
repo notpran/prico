@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from '@/components/theme-provider'
-import { ConvexProvider } from '@/components/convex-provider'
 import { PerformanceProvider } from '@/lib/performance-context'
 import './globals.css'
 
@@ -29,9 +28,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <PerformanceProvider>
-              <ConvexProvider>
-                {children}
-              </ConvexProvider>
+              {children}
             </PerformanceProvider>
           </ThemeProvider>
         </body>
