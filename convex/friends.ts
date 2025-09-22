@@ -5,20 +5,29 @@ import { mutation, query } from "./_generated/server";
 export const getFriends = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    const friendships = await ctx.db
+    // Get friendships where user is requester and status is accepted
+    const sentFriendships = await ctx.db
       .query("friendships")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .withIndex("by_requester", (q) => q.eq("requester", args.userId))
       .filter((q) => q.eq(q.field("status"), "accepted"))
       .collect();
 
+    // Get friendships where user is addressee and status is accepted
+    const receivedFriendships = await ctx.db
+      .query("friendships")
+      .withIndex("by_addressee", (q) => q.eq("addressee", args.userId))
+      .filter((q) => q.eq(q.field("status"), "accepted"))
+      .collect();
+
+    const friendIds = [
+      ...sentFriendships.map(f => f.addressee),
+      ...receivedFriendships.map(f => f.requester)
+    ];
+
     const friends = await Promise.all(
-      friendships.map(async (friendship) => {
-        const friend = await ctx.db.get(friendship.friendId);
-        return {
-          ...friend,
-          friendshipId: friendship._id,
-          friendsSince: friendship.createdAt,
-        };
+      friendIds.map(async (friendId) => {
+        const friend = await ctx.db.get(friendId);
+        return friend;
       })
     );
 
@@ -26,19 +35,19 @@ export const getFriends = query({
   },
 });
 
-// Get pending friend requests
+// Get pending friend requests (received by user)
 export const getPendingRequests = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const requests = await ctx.db
       .query("friendships")
-      .withIndex("by_friend", (q) => q.eq("friendId", args.userId))
+      .withIndex("by_addressee", (q) => q.eq("addressee", args.userId))
       .filter((q) => q.eq(q.field("status"), "pending"))
       .collect();
 
     const requestsWithUsers = await Promise.all(
       requests.map(async (request) => {
-        const requester = await ctx.db.get(request.userId);
+        const requester = await ctx.db.get(request.requester);
         return {
           ...request,
           requester,
@@ -50,49 +59,54 @@ export const getPendingRequests = query({
   },
 });
 
+// Get sent friend requests
+export const getSentRequests = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const requests = await ctx.db
+      .query("friendships")
+      .withIndex("by_requester", (q) => q.eq("requester", args.userId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .collect();
+
+    const requestsWithUsers = await Promise.all(
+      requests.map(async (request) => {
+        const addressee = await ctx.db.get(request.addressee);
+        return {
+          ...request,
+          addressee,
+        };
+      })
+    );
+
+    return requestsWithUsers.filter((r) => r.addressee);
+  },
+});
+
 // Send friend request
 export const sendFriendRequest = mutation({
-  args: { userId: v.id("users"), friendId: v.id("users") },
+  args: { requesterId: v.id("users"), addresseeId: v.id("users") },
   handler: async (ctx, args) => {
     // Check if friendship already exists
     const existingFriendship = await ctx.db
       .query("friendships")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .filter((q) => q.eq(q.field("friendId"), args.friendId))
+      .filter((q) =>
+        q.or(
+          q.and(q.eq(q.field("requester"), args.requesterId), q.eq(q.field("addressee"), args.addresseeId)),
+          q.and(q.eq(q.field("requester"), args.addresseeId), q.eq(q.field("addressee"), args.requesterId))
+        )
+      )
       .first();
 
     if (existingFriendship) {
       throw new Error("Friendship already exists");
     }
 
-    // Check reverse friendship
-    const reverseFriendship = await ctx.db
-      .query("friendships")
-      .withIndex("by_user", (q) => q.eq("userId", args.friendId))
-      .filter((q) => q.eq(q.field("friendId"), args.userId))
-      .first();
-
-    if (reverseFriendship) {
-      throw new Error("Friend request already received");
-    }
-
     const now = Date.now();
     const friendshipId = await ctx.db.insert("friendships", {
-      userId: args.userId,
-      friendId: args.friendId,
+      requester: args.requesterId,
+      addressee: args.addresseeId,
       status: "pending",
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    // Create notification
-    await ctx.db.insert("notifications", {
-      userId: args.friendId,
-      type: "friend_request",
-      title: "New friend request",
-      content: "You have a new friend request",
-      data: { senderId: args.userId },
-      read: false,
       createdAt: now,
     });
 
@@ -116,16 +130,7 @@ export const acceptFriendRequest = mutation({
     // Update the friendship status
     await ctx.db.patch(args.friendshipId, {
       status: "accepted",
-      updatedAt: Date.now(),
-    });
-
-    // Create reverse friendship
-    await ctx.db.insert("friendships", {
-      userId: friendship.friendId,
-      friendId: friendship.userId,
-      status: "accepted",
-      createdAt: friendship.createdAt,
-      updatedAt: Date.now(),
+      acceptedAt: Date.now(),
     });
 
     return args.friendshipId;
@@ -136,7 +141,53 @@ export const acceptFriendRequest = mutation({
 export const declineFriendRequest = mutation({
   args: { friendshipId: v.id("friendships") },
   handler: async (ctx, args) => {
-    await ctx.db.delete(args.friendshipId);
+    const friendship = await ctx.db.get(args.friendshipId);
+    if (!friendship) {
+      throw new Error("Friendship not found");
+    }
+
+    if (friendship.status !== "pending") {
+      throw new Error("Friend request is not pending");
+    }
+
+    await ctx.db.patch(args.friendshipId, {
+      status: "declined",
+    });
+
+    return true;
+  },
+});
+
+// Block user
+export const blockUser = mutation({
+  args: { requesterId: v.id("users"), addresseeId: v.id("users") },
+  handler: async (ctx, args) => {
+    // Check if friendship already exists
+    const existingFriendship = await ctx.db
+      .query("friendships")
+      .filter((q) =>
+        q.or(
+          q.and(q.eq(q.field("requester"), args.requesterId), q.eq(q.field("addressee"), args.addresseeId)),
+          q.and(q.eq(q.field("requester"), args.addresseeId), q.eq(q.field("addressee"), args.requesterId))
+        )
+      )
+      .first();
+
+    if (existingFriendship) {
+      // Update existing friendship to blocked
+      await ctx.db.patch(existingFriendship._id, {
+        status: "blocked"
+      });
+    } else {
+      // Create new blocked friendship
+      await ctx.db.insert("friendships", {
+        requester: args.requesterId,
+        addressee: args.addresseeId,
+        status: "blocked",
+        createdAt: Date.now()
+      });
+    }
+
     return true;
   },
 });
@@ -145,44 +196,54 @@ export const declineFriendRequest = mutation({
 export const removeFriend = mutation({
   args: { userId: v.id("users"), friendId: v.id("users") },
   handler: async (ctx, args) => {
-    // Find both friendship records
-    const friendship1 = await ctx.db
+    // Find friendship records between these users
+    const friendships = await ctx.db
       .query("friendships")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .filter((q) => q.eq(q.field("friendId"), args.friendId))
-      .first();
+      .filter((q) =>
+        q.or(
+          q.and(q.eq(q.field("requester"), args.userId), q.eq(q.field("addressee"), args.friendId)),
+          q.and(q.eq(q.field("requester"), args.friendId), q.eq(q.field("addressee"), args.userId))
+        )
+      )
+      .collect();
 
-    const friendship2 = await ctx.db
-      .query("friendships")
-      .withIndex("by_user", (q) => q.eq("userId", args.friendId))
-      .filter((q) => q.eq(q.field("friendId"), args.userId))
-      .first();
-
-    if (friendship1) await ctx.db.delete(friendship1._id);
-    if (friendship2) await ctx.db.delete(friendship2._id);
+    // Delete all friendship records
+    await Promise.all(friendships.map(f => ctx.db.delete(f._id)));
 
     return true;
   },
 });
 
-// Search users by username
+// Search users by username (excluding current user and existing friends)
 export const searchUsers = query({
   args: { query: v.string(), currentUserId: v.id("users") },
   handler: async (ctx, args) => {
     const users = await ctx.db
       .query("users")
       .withIndex("by_username")
-      .filter((q) => 
-        q.and(
-          q.neq(q.field("_id"), args.currentUserId),
-          q.or(
-            q.eq(q.field("username"), args.query),
-            q.eq(q.field("displayName"), args.query)
-          )
+      .collect();
+
+    // Get existing friendships
+    const friendships = await ctx.db
+      .query("friendships")
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("requester"), args.currentUserId),
+          q.eq(q.field("addressee"), args.currentUserId)
         )
       )
-      .take(10);
+      .collect();
 
-    return users;
+    const friendIds = new Set([
+      ...friendships.map(f => f.requester),
+      ...friendships.map(f => f.addressee)
+    ]);
+
+    return users.filter(user =>
+      user._id !== args.currentUserId &&
+      !friendIds.has(user._id) &&
+      (user.username.toLowerCase().includes(args.query.toLowerCase()) ||
+       user.displayName.toLowerCase().includes(args.query.toLowerCase()))
+    ).slice(0, 20);
   },
 });
