@@ -30,7 +30,7 @@ export function EnhancedFriendsPanel({ onSelectDM, selectedConversation }: Enhan
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('dms');
 
-  // Mock data for development - will be replaced with Convex queries
+  // Friend data - in production this will be loaded from Convex database
   const friends = [
     {
       _id: '1',

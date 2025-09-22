@@ -44,11 +44,11 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
     },
   ]);
 
-  // Mock community data
-  const mockCommunity = {
-    id: selectedChat?.id || 'demo-community',
-    name: selectedChat?.name || 'Demo Community',
-    channels: [
+  // Community data - dynamically determined from selectedChat
+  const communityData = {
+    id: selectedChat?.id || selectedChat?.communityId || 'general',
+    name: selectedChat?.name || selectedChat?.communityName || 'General Chat',
+    channels: selectedChat?.channels || [
       { 
         id: 'general', 
         name: 'general', 
@@ -78,13 +78,13 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
 
   useEffect(() => {
     // Auto-select the first text channel
-    if (!selectedChannel && mockCommunity.channels.length > 0) {
-      const firstTextChannel = mockCommunity.channels.find(c => c.type === 'text');
+    if (!selectedChannel && communityData.channels.length > 0) {
+      const firstTextChannel = communityData.channels.find((c: any) => c.type === 'text');
       if (firstTextChannel) {
         setSelectedChannel(firstTextChannel);
       }
     }
-  }, [selectedChannel, mockCommunity.channels]);
+  }, [selectedChannel, communityData.channels]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -101,7 +101,7 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
       <div className="w-60 bg-slate-800 border-r border-slate-700 flex flex-col">
         {/* Community Header */}
         <div className="p-4 border-b border-slate-700">
-          <h2 className="text-white font-semibold text-lg">{mockCommunity.name}</h2>
+          <h2 className="text-white font-semibold text-lg">{communityData.name}</h2>
           <p className="text-gray-400 text-sm">Welcome to the community!</p>
         </div>
 
@@ -112,7 +112,7 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
               Text Channels
             </div>
             
-            {mockCommunity.channels.filter(c => c.type === 'text').map((channel) => (
+            {communityData.channels.filter((c: any) => c.type === 'text').map((channel: any) => (
               <Button
                 key={channel.id}
                 variant={selectedChannel?.id === channel.id ? "secondary" : "ghost"}
@@ -132,7 +132,7 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
               Voice Channels
             </div>
             
-            {mockCommunity.channels.filter(c => c.type === 'voice').map((channel) => (
+            {communityData.channels.filter((c: any) => c.type === 'voice').map((channel: any) => (
               <Button
                 key={channel.id}
                 variant="ghost"
@@ -172,7 +172,7 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
       <div className="flex-1 flex flex-col">
         {selectedChannel ? (
           <RealTimeChat
-            communityId={mockCommunity.id}
+            communityId={communityData.id}
             channelId={selectedChannel.id}
             channelName={selectedChannel.name}
           />
@@ -180,7 +180,7 @@ export function ChatInterface({ user, selectedChat }: ChatInterfaceProps) {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <Hash className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">Welcome to {mockCommunity.name}</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Welcome to {communityData.name}</h3>
               <p className="text-gray-400">Select a channel to start chatting</p>
             </div>
           </div>

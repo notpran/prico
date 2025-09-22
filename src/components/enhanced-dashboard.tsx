@@ -3,7 +3,7 @@ import { useUser } from '@clerk/nextjs';
 import { EnhancedTopNav } from './enhanced-top-nav';
 import { EnhancedFriendsPanel } from './enhanced-friends-panel';
 import { RealTimeChat } from './real-time-chat';
-import { CommunityPanel } from './community-panel';
+import { EnhancedCommunityPanel } from './enhanced-community-panel';
 import { CollaborativeWorkspace } from './collaborative-workspace';
 import { HomePanel } from './home-panel';
 import { RightSidebar } from './right-sidebar';
@@ -35,17 +35,27 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
     setCurrentView('friends');
   };
 
-  const handleChannelSelect = (communityId: string, channelId: string, channel: any) => {
+  const handleChannelSelect = (communityId: string, channelId: string, channelName: string) => {
     setSelectedCommunity(communityId);
     setSelectedChannel(channelId);
-    setSelectedChannelData(channel);
+    setSelectedChannelData({ name: channelName });
     setCurrentView('communities');
   };
 
-  const handleProjectSelect = (projectId: string, project: any) => {
-    setSelectedProject(projectId);
-    setSelectedProjectData(project);
+  const handleProjectSelect = (project: any) => {
+    if (project) {
+      setSelectedProject(project.id);
+      setSelectedProjectData(project);
+    }
     setCurrentView('projects');
+  };
+
+  const handleChatSelect = (chat: any) => {
+    if (chat) {
+      setSelectedDMConversation(chat.id);
+      setSelectedDMUser(chat.otherUser);
+    }
+    setCurrentView('friends');
   };
 
   const renderMainContent = () => {
@@ -56,7 +66,7 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
             <HomePanel 
               user={user} 
               onProjectSelect={handleProjectSelect}
-              onChatSelect={handleDMSelect}
+              onChatSelect={handleChatSelect}
             />
           </div>
         );
@@ -64,13 +74,13 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
       case 'friends':
         return (
           <div className="flex-1 flex">
-            <EnhancedFriendsPanel 
+                        <EnhancedFriendsPanel 
               onSelectDM={handleDMSelect}
-              selectedConversation={selectedDMConversation}
             />
             <RealTimeChat 
-              conversationId={selectedDMConversation}
-              otherUser={selectedDMUser}
+              isDM={true}
+              recipientId={selectedDMUser?.id}
+              recipientName={selectedDMUser?.name}
             />
           </div>
         );
@@ -78,10 +88,8 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
       case 'communities':
         return (
           <div className="flex-1 flex">
-            <CommunityPanel 
+                        <EnhancedCommunityPanel
               onSelectChannel={handleChannelSelect}
-              selectedCommunity={selectedCommunity}
-              selectedChannel={selectedChannel}
             />
             {selectedChannel && selectedChannelData ? (
               <div className="flex-1 flex flex-col bg-slate-900">
@@ -149,7 +157,7 @@ export function EnhancedDashboard({ onLogout }: EnhancedDashboardProps) {
             <HomePanel 
               user={user} 
               onProjectSelect={handleProjectSelect}
-              onChatSelect={handleDMSelect}
+              onChatSelect={handleChatSelect}
             />
           </div>
         );

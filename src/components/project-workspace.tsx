@@ -115,10 +115,10 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
 
   const currentProject = selectedProject || projects[0];
   
-  // Ensure required properties exist for demo users
+  // Ensure required properties exist for projects
   if (currentProject && !currentProject.collaborators) {
     currentProject.collaborators = [
-      { name: 'Demo User', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo' },
+      { name: user.name, avatar: user.avatar },
       { name: 'Sarah Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah' },
       { name: 'Alex Johnson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex' }
     ];

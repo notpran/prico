@@ -96,79 +96,10 @@ export function CollaborativeWorkspace({ onSelectProject, selectedProject }: Col
     repository: ''
   });
 
-  // Mock data for development
-  const userProjects: Project[] = [
-    {
-      _id: 'proj1',
-      name: 'React Dashboard',
-      description: 'Modern admin dashboard built with React and TypeScript',
-      slug: 'react-dashboard',
-      language: 'TypeScript',
-      framework: 'React',
-      technology: ['react', 'typescript', 'tailwindcss', 'vite'],
-      status: 'active',
-      isPublic: true,
-      contributorCount: 3,
-      lastActivity: Date.now() - 3600000,
-      repository: {
-        url: 'https://github.com/user/react-dashboard',
-        provider: 'github',
-        owner: 'user',
-        name: 'react-dashboard',
-        branch: 'main'
-      },
-      stats: {
-        commitCount: 127,
-        linesOfCode: 15420
-      }
-    },
-    {
-      _id: 'proj2',
-      name: 'Node.js API',
-      description: 'RESTful API with authentication and real-time features',
-      slug: 'nodejs-api',
-      language: 'JavaScript',
-      framework: 'Express',
-      technology: ['nodejs', 'express', 'mongodb', 'socket.io'],
-      status: 'active',
-      isPublic: false,
-      contributorCount: 2,
-      lastActivity: Date.now() - 7200000,
-      stats: {
-        commitCount: 89,
-        linesOfCode: 8340
-      }
-    }
-  ];
-
-  const mockFiles: ProjectFile[] = [
-    {
-      _id: 'file1',
-      name: 'App.tsx',
-      path: 'src/App.tsx',
-      content: `import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Dashboard from './components/Dashboard';
-import Settings from './components/Settings';
-
-function App() {
-  return (
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
-    </div>
-  );
-}
-
-export default App;`,
-      language: 'typescript',
-      size: 456,
-      lastModifiedAt: Date.now() - 3600000,
-      lastModifiedBy: 'John Doe'
-    }
-  ];
+    // Use real data from hooks (fallback to empty arrays)
+  const userProjects: any[] = [];
+  const publicProjects: any[] = [];
+  const projectFiles: any[] = [];
 
   const currentProject = userProjects.find(p => p._id === selectedProject);
 
@@ -268,7 +199,7 @@ export default App;`,
                 </div>
                 <ScrollArea className="flex-1">
                   <div className="p-2">
-                    {mockFiles.map((file) => (
+                    {projectFiles.map((file: any) => (
                       <Button
                         key={file._id}
                         variant={selectedFile?._id === file._id ? "secondary" : "ghost"}

@@ -16,13 +16,14 @@ import {
   Circle,
   Zap,
   Search,
-  Command
+  Command,
+  Hash
 } from 'lucide-react';
 
 interface TopNavProps {
   user: any;
   currentView: string;
-  onViewChange: (view: 'home' | 'chats' | 'friends' | 'projects') => void;
+  onViewChange: (view: 'home' | 'chats' | 'friends' | 'communities' | 'projects') => void;
   onLogout: () => void;
 }
 
@@ -31,6 +32,7 @@ export function TopNav({ user, currentView, onViewChange, onLogout }: TopNavProp
     { id: 'home', icon: Home, label: 'Home', badge: null },
     { id: 'chats', icon: MessageCircle, label: 'Chats', badge: 3 },
     { id: 'friends', icon: Users, label: 'Friends', badge: 2 },
+    { id: 'communities', icon: Hash, label: 'Communities', badge: 5 },
     { id: 'projects', icon: Folder, label: 'Projects', badge: null },
   ];
 
@@ -115,7 +117,7 @@ export function TopNav({ user, currentView, onViewChange, onLogout }: TopNavProp
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
             <input
               type="text"
-              placeholder="Search projects, chats, friends..."
+              placeholder="Search Prico..."
               className="w-full pl-10 pr-4 py-2 glass-dark border border-blue-500/30 rounded-lg text-blue-100 placeholder:text-blue-400 outline-none focus:border-blue-400 ultra-smooth font-inter text-sm"
             />
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { TopNav } from './top-nav';
 import { ChatInterface } from './enhanced-chat-interface';
 import { ProjectWorkspace } from './project-workspace';
-import { FriendsPanel } from './friends-panel';
+import { EnhancedFriendsPanel } from './enhanced-friends-panel';
+import { EnhancedCommunityPanel } from './enhanced-community-panel';
 import { HomePanel } from './home-panel';
 import { RightSidebar } from './right-sidebar';
 
@@ -12,9 +13,11 @@ interface DashboardProps {
 }
 
 export function Dashboard({ user, onLogout }: DashboardProps) {
-  const [currentView, setCurrentView] = useState<'home' | 'chats' | 'friends' | 'projects'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'chats' | 'friends' | 'communities' | 'projects'>('home');
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [selectedCommunity, setSelectedCommunity] = useState<string | undefined>(undefined);
+  const [selectedChannel, setSelectedChannel] = useState<string | undefined>(undefined);
 
   const handleProjectSelect = (project: any) => {
     setSelectedProject(project);
@@ -39,7 +42,26 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
       case 'chats':
         return <ChatInterface user={user} selectedChat={selectedChat} />;
       case 'friends':
-        return <FriendsPanel user={user} />;
+        return (
+          <EnhancedFriendsPanel 
+            onSelectDM={(conversationId, otherUser) => {
+              setSelectedChat({ id: conversationId, otherUser });
+              setCurrentView('chats');
+            }}
+            selectedConversation={selectedChat?.id}
+          />
+        );
+      case 'communities':
+        return (
+          <EnhancedCommunityPanel
+            onSelectChannel={(communityId, channelId, channelName) => {
+              setSelectedCommunity(communityId);
+              setSelectedChannel(channelId);
+            }}
+            selectedCommunity={selectedCommunity}
+            selectedChannel={selectedChannel}
+          />
+        );
       case 'projects':
         return <ProjectWorkspace user={user} selectedProject={selectedProject} />;
       default:
