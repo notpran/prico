@@ -67,7 +67,6 @@ Build **Prico** — a cross-platform product-first app (web-first Next.js) that 
 
 ```
 MONGODB_URI=<mongodb+srv://...>
-CLERK_FRONTEND_API=<clerk_frontend_api>
 CLERK_SECRET_KEY=<clerk_secret_key>
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<clerk_publishable>
 S3_BUCKET_URL=<s3_base_url>
