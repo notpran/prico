@@ -1,7 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
-import { connectToDatabase } from '../../../lib/mongo';
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
+import { connectToDatabase } from '../../../lib/mongo';
+import { requireAuth } from '../../../lib/auth-middleware';
+import { validateChannelName } from '../../../lib/validation';
+import { logAuditEvent } from '../../../lib/audit';
+import { Community } from '../../../lib/models';
 
 // GET /api/communities - List communities (public or user's)
 export async function GET() {
@@ -21,46 +23,71 @@ export async function GET() {
 
 // POST /api/communities - Create community
 export async function POST(request: NextRequest) {
+  let userId: string | undefined;
+
   try {
-    const { userId } = auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) return authResult;
+
+    userId = authResult.userId;
 
     const db = await connectToDatabase();
-    const communities = db.collection('communities');
+    const communities = db.collection<Community>('communities');
 
     const body = await request.json();
-    const { name, slug, privacy, description } = body;
+    const { name, description } = body;
 
-    // Validate required fields
-    if (!name || !slug || !privacy) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // Validate input
+    if (!name || typeof name !== 'string' || !validateChannelName(name)) {
+      return NextResponse.json({ error: 'Invalid community name' }, { status: 400 });
     }
+
+    if (description && (typeof description !== 'string' || description.length > 500)) {
+      return NextResponse.json({ error: 'Invalid description' }, { status: 400 });
+    }
+
+    // Generate slug
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
     // Check if slug is unique
     const existing = await communities.findOne({ slug });
     if (existing) {
-      return NextResponse.json({ error: 'Slug already exists' }, { status: 400 });
+      return NextResponse.json({ error: 'Community name already exists' }, { status: 400 });
     }
 
-    const newCommunity = {
+    const newCommunity: Community = {
+      _id: '', // Will be set by MongoDB
       name,
       slug,
       description: description || '',
       ownerId: userId,
       adminIds: [userId],
       memberIds: [userId],
-      privacy,
+      privacy: 'private',
       createdAt: new Date(),
       channels: [],
     };
 
-    await communities.insertOne(newCommunity);
+    const result = await communities.insertOne(newCommunity);
+    newCommunity._id = result.insertedId.toString();
+
+    // Log audit event
+    await logAuditEvent('CREATE', 'community', true, {
+      userId,
+      resourceId: newCommunity._id,
+      details: { name, slug },
+    });
 
     return NextResponse.json(newCommunity, { status: 201 });
   } catch (error) {
-    console.error(error);
+    console.error('Create community error:', error);
+
+    // Log failed audit event
+    await logAuditEvent('CREATE', 'community', false, {
+      userId,
+      details: { error: error instanceof Error ? error.message : 'Unknown error' },
+    });
+
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
