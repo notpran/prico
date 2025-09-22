@@ -42,8 +42,8 @@ io.on('connection', (socket) => {
   });
 
   // Send message
-  socket.on('send_message', async (data: { channelId: string; tempId: string; content: string }) => {
-    const { channelId, tempId, content } = data;
+  socket.on('send_message', async (data: { channelId: string; tempId: string; content: string; attachments?: string[] }) => {
+    const { channelId, tempId, content, attachments } = data;
     const userId = socket.data.userId;
 
     // Save to DB
@@ -54,6 +54,7 @@ io.on('connection', (socket) => {
       channelId,
       authorId: userId,
       content,
+      attachments: attachments || [],
       createdAt: new Date(),
     };
 

@@ -38,8 +38,8 @@ class SocketManager {
     this.socket?.emit('leave_channel', channelId);
   }
 
-  sendMessage(channelId: string, tempId: string, content: string) {
-    this.socket?.emit('send_message', { channelId, tempId, content });
+  sendMessage(channelId: string, tempId: string, content: string, attachments?: string[]) {
+    this.socket?.emit('send_message', { channelId, tempId, content, attachments });
   }
 
   onMessageCreated(callback: (data: any) => void) {
