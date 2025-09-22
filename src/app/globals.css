@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import performance optimizations */
+@import '../styles/performance.css';
+
 @layer base {
   :root {
     --background: 0 0% 100%;
