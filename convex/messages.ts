@@ -1,26 +1,32 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 // Send a message
 export const sendMessage = mutation({
   args: {
     content: v.string(),
-    senderId: v.id("users"),
+    authorId: v.id("users"),
     communityId: v.id("communities"),
     channelId: v.id("channels"),
-    replyToId: v.optional(v.id("messages")),
-    attachments: v.optional(v.array(v.string())),
+    replyTo: v.optional(v.id("messages")),
+    attachments: v.optional(v.array(v.object({
+      filename: v.string(),
+      url: v.string(),
+      size: v.number(),
+      type: v.string()
+    }))),
   },
   handler: async (ctx, args) => {
     const messageId = await ctx.db.insert("messages", {
-      content: args.content,
-      senderId: args.senderId,
-      communityId: args.communityId,
       channelId: args.channelId,
-      replyToId: args.replyToId,
-      attachments: args.attachments,
+      senderId: args.authorId,
+      content: args.content,
+      type: "text",
       reactions: [],
-      createdAt: Date.now(),
+      mentions: [],
+      replyTo: args.replyTo,
+      isPinned: false,
+      createdAt: Date.now()
     });
 
     return messageId;
@@ -28,37 +34,34 @@ export const sendMessage = mutation({
 });
 
 // Get messages for a channel
-export const getChannelMessages = query({
-  args: { 
+export const getMessages = query({
+  args: {
     channelId: v.id("channels"),
-    limit: v.optional(v.number()),
+    limit: v.optional(v.number())
   },
   handler: async (ctx, args) => {
     const limit = args.limit || 50;
-    
+
     const messages = await ctx.db
       .query("messages")
-      .withIndex("by_channel_time", (q) => q.eq("channelId", args.channelId))
-      .order("desc")
-      .take(limit);
+      .withIndex("by_channel", (q) => q.eq("channelId", args.channelId))
+      .collect();
 
-    // Get sender information for each message
-    const messagesWithSenders = await Promise.all(
-      messages.map(async (message) => {
-        const sender = await ctx.db.get(message.senderId);
+    // Sort by creation time (newest first)
+    messages.sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
+
+    // Get author information for each message
+    const messagesWithAuthors = await Promise.all(
+      messages.slice(0, limit).map(async (message) => {
+        const author = await ctx.db.get(message.senderId);
         return {
           ...message,
-          sender: sender ? {
-            _id: sender._id,
-            username: sender.username,
-            displayName: sender.displayName,
-            avatarUrl: sender.avatarUrl,
-          } : null,
+          author
         };
       })
     );
 
-    return messagesWithSenders.reverse(); // Return in chronological order
+    return messagesWithAuthors.filter(m => m.author);
   },
 });
 
@@ -67,7 +70,7 @@ export const editMessage = mutation({
   args: {
     messageId: v.id("messages"),
     content: v.string(),
-    userId: v.id("users"),
+    authorId: v.id("users")
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
@@ -75,14 +78,16 @@ export const editMessage = mutation({
       throw new Error("Message not found");
     }
 
-    if (message.senderId !== args.userId) {
-      throw new Error("Unauthorized: Can only edit your own messages");
+    if (message.senderId !== args.authorId) {
+      throw new Error("Only the author can edit the message");
     }
 
     await ctx.db.patch(args.messageId, {
       content: args.content,
-      editedAt: Date.now(),
+      editedAt: Date.now()
     });
+
+    return true;
   },
 });
 
@@ -90,7 +95,7 @@ export const editMessage = mutation({
 export const deleteMessage = mutation({
   args: {
     messageId: v.id("messages"),
-    userId: v.id("users"),
+    authorId: v.id("users")
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
@@ -98,13 +103,35 @@ export const deleteMessage = mutation({
       throw new Error("Message not found");
     }
 
-    if (message.senderId !== args.userId) {
-      throw new Error("Unauthorized: Can only delete your own messages");
+    if (message.senderId !== args.authorId) {
+      throw new Error("Only the author can delete the message");
     }
 
+    await ctx.db.delete(args.messageId);
+    return true;
+  },
+});
+
+// Pin/unpin a message
+export const togglePinMessage = mutation({
+  args: {
+    messageId: v.id("messages"),
+    authorId: v.id("users")
+  },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    // Check if user has permission to pin (could be community admin check)
+    // For now, allow any user to pin/unpin
+
     await ctx.db.patch(args.messageId, {
-      deletedAt: Date.now(),
+      isPinned: !message.isPinned
     });
+
+    return !message.isPinned;
   },
 });
 
@@ -121,32 +148,55 @@ export const addReaction = mutation({
       throw new Error("Message not found");
     }
 
-    const reactions = message.reactions || [];
-    const existingReaction = reactions.find(r => r.emoji === args.emoji);
+    const existingReaction = message.reactions.find(
+      (r: any) => r.emoji === args.emoji && r.userId === args.userId
+    );
 
     if (existingReaction) {
-      if (existingReaction.userIds.includes(args.userId)) {
-        // Remove reaction
-        existingReaction.userIds = existingReaction.userIds.filter(id => id !== args.userId);
-        if (existingReaction.userIds.length === 0) {
-          // Remove empty reaction
-          const updatedReactions = reactions.filter(r => r.emoji !== args.emoji);
-          await ctx.db.patch(args.messageId, { reactions: updatedReactions });
-        } else {
-          await ctx.db.patch(args.messageId, { reactions });
-        }
-      } else {
-        // Add user to existing reaction
-        existingReaction.userIds.push(args.userId);
-        await ctx.db.patch(args.messageId, { reactions });
-      }
-    } else {
-      // Create new reaction
-      reactions.push({
-        emoji: args.emoji,
-        userIds: [args.userId],
+      // User already reacted with this emoji, remove it
+      const updatedReactions = message.reactions.filter(
+        (r: any) => !(r.emoji === args.emoji && r.userId === args.userId)
+      );
+      await ctx.db.patch(args.messageId, {
+        reactions: updatedReactions
       });
-      await ctx.db.patch(args.messageId, { reactions });
+    } else {
+      // Add new reaction
+      const updatedReactions = [...message.reactions, {
+        emoji: args.emoji,
+        userId: args.userId,
+        createdAt: Date.now()
+      }];
+      await ctx.db.patch(args.messageId, {
+        reactions: updatedReactions
+      });
     }
+
+    return true;
+  },
+});
+
+// Get pinned messages for a channel
+export const getPinnedMessages = query({
+  args: { channelId: v.id("channels") },
+  handler: async (ctx, args) => {
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_channel", (q) => q.eq("channelId", args.channelId))
+      .filter((q) => q.eq(q.field("isPinned"), true))
+      .collect();
+
+    // Get author information for each message
+    const messagesWithAuthors = await Promise.all(
+      messages.map(async (message) => {
+        const author = await ctx.db.get(message.senderId);
+        return {
+          ...message,
+          author
+        };
+      })
+    );
+
+    return messagesWithAuthors.filter(m => m.author);
   },
 });
