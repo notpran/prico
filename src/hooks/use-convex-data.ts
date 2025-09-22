@@ -9,6 +9,25 @@ import { useEffect } from 'react';
 export function useEnsureUser() {
   const { user } = useUser();
   const { isAuthenticated } = useConvexAuth();
+  
+  // Check if Convex is configured
+  const isConvexConfigured = !!process.env.NEXT_PUBLIC_CONVEX_URL;
+  
+  // If Convex is not configured, return mock user
+  if (!isConvexConfigured) {
+    return {
+      convexUser: user ? {
+        _id: user.id,
+        clerkId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        username: user.username || user.firstName || 'user',
+        displayName: user.fullName || user.firstName || 'User',
+        avatarUrl: user.imageUrl,
+      } : null,
+      isLoading: false,
+    };
+  }
+
   const createUser = useMutation(api.users.createUser);
   
   // Get existing user
@@ -39,6 +58,37 @@ export function useEnsureUser() {
 export function useUserCommunities() {
   const { convexUser, isLoading: userLoading } = useEnsureUser();
   
+  // Check if Convex is configured
+  const isConvexConfigured = !!process.env.NEXT_PUBLIC_CONVEX_URL;
+  
+  // If Convex is not configured, return mock data
+  if (!isConvexConfigured) {
+    return {
+      communities: [
+        {
+          _id: 'mock-1',
+          name: 'General Community',
+          description: 'A general community for testing',
+          isPublic: true,
+          memberCount: 42,
+          tags: ['general', 'testing'],
+          unreadCount: 3
+        },
+        {
+          _id: 'mock-2', 
+          name: 'Development',
+          description: 'For developers',
+          isPublic: true,
+          memberCount: 128,
+          tags: ['dev', 'coding'],
+          unreadCount: 0
+        }
+      ],
+      isLoading: false,
+      convexUser,
+    };
+  }
+  
   const communities = useQuery(
     api.communities.getUserCommunities,
     convexUser?._id ? { userId: convexUser._id } : 'skip'
@@ -68,6 +118,34 @@ export function usePublicCommunities() {
 export function useCommunityChannels(communityId?: string) {
   const { isAuthenticated } = useConvexAuth();
   
+  // Check if Convex is configured
+  const isConvexConfigured = !!process.env.NEXT_PUBLIC_CONVEX_URL;
+  
+  // If Convex is not configured, return mock data
+  if (!isConvexConfigured) {
+    return {
+      channels: [
+        {
+          _id: 'mock-channel-1',
+          name: 'general',
+          description: 'General chat',
+          type: 'text',
+          position: 0,
+          communityId: communityId || 'mock-1'
+        },
+        {
+          _id: 'mock-channel-2',
+          name: 'random',
+          description: 'Random discussions',
+          type: 'text', 
+          position: 1,
+          communityId: communityId || 'mock-1'
+        }
+      ],
+      isLoading: false,
+    };
+  }
+  
   const channels = useQuery(
     api.communities.getCommunityChannels,
     isAuthenticated && communityId ? { communityId } : 'skip'
@@ -96,6 +174,41 @@ export function useUserFriends() {
 
 export function useUserProjects() {
   const { convexUser, isLoading: userLoading } = useEnsureUser();
+
+  // Check if Convex is configured
+  const isConvexConfigured = !!process.env.NEXT_PUBLIC_CONVEX_URL;
+  
+  // If Convex is not configured, return mock data
+  if (!isConvexConfigured) {
+    return {
+      projects: [
+        {
+          _id: 'mock-project-1',
+          name: 'My Awesome Project',
+          description: 'A really cool project I\'m working on',
+          isPublic: true,
+          techStack: ['React', 'TypeScript', 'Node.js'],
+          stats: {
+            stars: 42,
+            watchers: 12,
+            branches: 3,
+            openPRs: 2,
+            lastActivity: Date.now() - 86400000 // 1 day ago
+          },
+          lastCommit: '2 hours ago',
+          collaborators: [
+            {
+              name: 'John Doe',
+              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john',
+              role: 'Owner'
+            }
+          ]
+        }
+      ],
+      isLoading: false,
+      convexUser,
+    };
+  }
 
   const projects = useQuery(
     api.projects.getUserProjects,
