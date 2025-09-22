@@ -1,5 +1,9 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
 import * as path from 'path';
+
+// Load environment variables from project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import * as fs from 'fs';
 
 const REPO_BASE_PATH = process.env.REPO_BASE_PATH || '/tmp/repos';

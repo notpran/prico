@@ -1,4 +1,9 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables from project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';

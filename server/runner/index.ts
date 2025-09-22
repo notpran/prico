@@ -1,8 +1,12 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables from project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import Docker from 'dockerode';
 import { Queue, Worker } from 'bullmq';
 import * as fs from 'fs';
-import * as path from 'path';
 
 const docker = new Docker();
 const codeQueue = new Queue('code-execution', {
