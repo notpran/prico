@@ -88,77 +88,26 @@ This is a monorepo using npm workspaces.This is a monorepo using npm workspaces.
 
 
 
-## Quick Start## Quick Start
+## Quick Start
 
+> 📖 **Detailed Setup Guide**: See [SETUP.md](./SETUP.md) for comprehensive installation and running instructions.
 
+### Prerequisites
+- Node.js 18+
+- Docker & Docker Compose
+- Git
 
-### Prerequisites### Prerequisites
+### Quick Setup
+```bash
+git clone <repository-url>
+cd prico
+npm install
+cp .env.example .env
+# Edit .env with your configuration
+npm run dev
+```
 
-
-
-- Node.js 18+- Node.js 18+
-
-- Docker & Docker Compose- Docker & Docker Compose
-
-- MongoDB Atlas account (or local Mongo)- MongoDB Atlas account (or local Mongo)
-
-- Clerk account for auth- Clerk account for auth
-
-
-
-### Setup### Setup
-
-
-
-1. **Clone and install dependencies:**1. **Clone and install dependencies:**
-
-   ```bash   ```bash
-
-   git clone <repository-url>   git clone <repository-url>
-
-   cd prico   cd prico
-
-   npm install   npm install
-
-   ```   ```
-
-
-
-2. **Start development environment:**2. **Start development environment:**
-
-   ```bash   ```bash
-
-   docker-compose up -d  # Starts MongoDB and Redis   docker-compose up -d  # Starts MongoDB and Redis
-
-   npm run dev           # Starts all services   npm run dev           # Starts all services
-
-   ```   ```
-
-
-
-3. **Configure environment variables:**3. **Configure environment variables:**
-
-   Copy `.env.example` to `.env` and fill in your values:   Copy `.env.example` to `.env` and fill in your values:
-
-   ```env   ```env
-
-   MONGODB_URI=mongodb+srv://...   MONGODB_URI=mongodb+srv://...
-
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
-
-   CLERK_SECRET_KEY=...   CLERK_SECRET_KEY=...
-
-   # etc.   # etc.
-
-   ```   ```
-
-
-
-4. **Open in browser:**4. **Open in browser:**
-
-   - Frontend: http://localhost:3000   - Frontend: http://localhost:3000
-
-   - Socket server: http://localhost:3001 (if separate)   - Socket server: http://localhost:3001 (if separate)
+Visit http://localhost:3000 to get started!
 
 
 
@@ -238,3 +187,112 @@ MIT License - see LICENSE file for details.
 - **Project Management**: (to be implemented)
 - **File Management**: (to be implemented)
 - **Pull Requests**: (to be implemented)
+
+## Security
+
+Prico implements several security measures:
+
+- **Rate Limiting**: API endpoints are protected with configurable rate limits
+- **Input Validation**: All user inputs are validated and sanitized
+- **Authentication**: Clerk-based authentication with middleware protection
+- **Security Headers**: Helmet.js for security headers (CSP, HSTS, etc.)
+- **CORS**: Configured CORS policies for cross-origin requests
+- **Audit Logging**: All critical actions are logged for compliance
+- **API Keys**: Optional API key authentication for service-to-service calls
+
+### Environment Variables
+
+```bash
+# Security
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+API_KEY=your_api_key_here
+SESSION_SECRET=your_session_secret_here
+ENCRYPTION_KEY=your_encryption_key_here
+
+# Monitoring
+HEALTH_CHECK_INTERVAL=30000
+METRICS_RETENTION_DAYS=30
+```
+
+### Health Checks
+
+- `/api/health` - Basic health check endpoint
+- `/api/metrics` - System metrics and statistics
+
+## Deployment
+
+### Docker Deployment
+
+1. **Build and run with Docker Compose:**
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+2. **Environment variables:**
+   Copy `.env.example` to `.env` and configure your production values.
+
+### CI/CD
+
+The project includes GitHub Actions workflows for:
+- **CI**: Automated testing, linting, and security scanning
+- **CD**: Automated deployment to production on main branch pushes
+
+### Manual Deployment
+
+1. **Build the application:**
+   ```bash
+   npm run build
+   ```
+
+2. **Start production services:**
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+3. **Monitor health:**
+   ```bash
+   curl http://localhost:3000/api/health
+   ```
+
+## Enterprise Features
+
+Prico supports enterprise-grade features for compliance and security:
+
+### SSO Integration
+- **Clerk**: Default authentication provider
+- **Auth0**: Enterprise SSO support
+- **Okta**: SAML-based authentication
+- **Custom**: Extensible provider system
+
+### Compliance
+- **GDPR**: Data portability and right to be forgotten
+- **HIPAA**: Healthcare data protection
+- **SOC 2**: Security, availability, and confidentiality
+- **Data Retention**: Configurable retention policies
+- **Encryption**: At-rest and in-transit encryption
+
+### RBAC (Role-Based Access Control)
+- **User Roles**: User, Moderator, Admin, Owner
+- **Permissions**: Granular permission system
+- **Audit Logs**: Comprehensive activity logging
+
+### Enterprise Configuration
+
+```bash
+# SSO
+SSO_ENABLED=true
+SSO_PROVIDER=auth0
+AUTH0_DOMAIN=your-domain.auth0.com
+AUTH0_CLIENT_ID=your-client-id
+AUTH0_CLIENT_SECRET=your-client-secret
+
+# Compliance
+GDPR_ENABLED=true
+HIPAA_ENABLED=false
+SOC2_ENABLED=true
+ENCRYPTION_AT_REST=true
+```
+
+### API Endpoints
+
+- `POST /api/compliance` - GDPR compliance operations (data export/deletion)
