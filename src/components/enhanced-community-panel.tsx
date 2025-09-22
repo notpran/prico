@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { RealTimeChat } from './real-time-chat';
+import { CreateCommunityModal } from './create-community-modal';
+import { FriendManagementModal } from './friend-management-modal';
 import { 
   Hash, 
   Users, 
@@ -482,40 +484,30 @@ export function EnhancedCommunityPanel({
 
       {/* Create/Join Community Buttons */}
       <div className="space-y-2">
-        <Dialog open={showCreateCommunity} onOpenChange={setShowCreateCommunity}>
-          <DialogTrigger asChild>
+        <CreateCommunityModal 
+          trigger={
             <Button className="w-full bg-green-600 hover:bg-green-700">
               <Plus className="h-4 w-4 mr-2" />
               Create Community
             </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-slate-900 border-slate-700">
-            <DialogHeader>
-              <DialogTitle className="text-white">Create New Community</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Community name"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-              <Textarea
-                placeholder="Community description"
-                className="bg-slate-800 border-slate-600 text-white"
-              />
-              <div className="flex space-x-2">
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
-                  Create Community
-                </Button>
-                <Button variant="outline" onClick={() => setShowCreateCommunity(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+          }
+          onSuccess={(communityId) => {
+            console.log('Community created:', communityId);
+            // Refresh communities list here
+          }}
+        />
         
-        <Button variant="outline" className="w-full">
-          <UserPlus className="h-4 w-4 mr-2" />
+        <FriendManagementModal 
+          trigger={
+            <Button variant="outline" className="w-full border-slate-600">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Manage Friends
+            </Button>
+          }
+        />
+        
+        <Button variant="outline" className="w-full border-slate-600">
+          <Plus className="h-4 w-4 mr-2" />
           Join with Invite Code
         </Button>
       </div>
