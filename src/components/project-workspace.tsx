@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUserProjects } from '@/hooks/use-convex-data';
+import { CreateProjectModal } from './create-project-modal';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -90,7 +91,26 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
           <div className="text-center text-gray-400">
             <Code className="h-16 w-16 mx-auto mb-4 opacity-50" />
             <h2 className="text-xl font-semibold mb-2">No Project Selected</h2>
-            <p>Select a project to view its workspace</p>
+            <p className="mb-6">Select a project to view its workspace or create a new one</p>
+            
+            <div className="space-y-3">
+              <CreateProjectModal 
+                trigger={
+                  <Button className="bg-indigo-600 hover:bg-indigo-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Project
+                  </Button>
+                }
+                onSuccess={(projectId) => {
+                  console.log('Project created:', projectId);
+                  // Refresh projects and potentially select the new project
+                }}
+              />
+              
+              <p className="text-sm text-gray-500">
+                Or browse existing projects from the sidebar
+              </p>
+            </div>
           </div>
         </div>
       ) : (
@@ -139,6 +159,17 @@ export function ProjectWorkspace({ user, selectedProject }: ProjectWorkspaceProp
             </div>
             
             <div className="flex items-center space-x-3">
+              <CreateProjectModal 
+                trigger={
+                  <Button variant="outline" className="border-slate-600 text-gray-300 hover:bg-slate-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Project
+                  </Button>
+                }
+                onSuccess={(projectId) => {
+                  console.log('Project created:', projectId);
+                }}
+              />
               <Button variant="outline" className="border-slate-600 text-gray-300 hover:bg-slate-700">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 View Live
