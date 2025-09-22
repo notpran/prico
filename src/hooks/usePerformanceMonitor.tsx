@@ -87,7 +87,11 @@ export function usePerformanceMonitor(config: Partial<PerformanceConfig> = {}) {
   }, []);
 
   useEffect(() => {
-    animationFrameRef.current = requestAnimationFrame(measureFrame);
+    const startMonitoring = () => {
+      animationFrameRef.current = requestAnimationFrame(measureFrame);
+    };
+    
+    startMonitoring();
     
     return () => {
       if (animationFrameRef.current) {
