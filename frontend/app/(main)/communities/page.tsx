@@ -12,7 +12,15 @@ export default async function CommunitiesPage() {
   }
 
   // This would fetch communities from our API in a real implementation
-  const communities = [];
+  interface Community {
+    id: string;
+    name: string;
+    description: string;
+    members: number;
+    image?: string;
+  }
+  
+  const communities: Community[] = [];
 
   return (
     <div className="container py-8">
