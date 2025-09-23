@@ -1,4 +1,5 @@
 """
+
 User routes for Prico API
 """
 from fastapi import APIRouter, HTTPException, Depends, Body, Header, Request
