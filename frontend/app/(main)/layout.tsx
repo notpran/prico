@@ -46,7 +46,7 @@ export default async function MainLayout({
         <div className="mt-auto flex flex-col gap-4">
           <ModeToggle />
           <UserButton
-            afterSignOutUrl="/sign-in"
+            afterSignOutUrl="/"
             appearance={{
               elements: {
                 userButtonAvatarBox: "h-[48px] w-[48px]",
