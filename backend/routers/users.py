@@ -198,6 +198,22 @@ async def delete_user(user_id: str, clerk_user: Dict[str, Any] = Depends(verify_
     return {"message": "User deleted successfully"}
 
 
+@router.get("/search", response_model=List[UserOut])
+async def search_users(
+    q: str,
+    clerk_user: Dict[str, Any] = Depends(verify_clerk_auth),
+    limit: int = 10
+):
+    """
+    Search users by username or display name
+    """
+    if len(q.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Search query must be at least 2 characters")
+    
+    users = await db.search_users(q, limit)
+    return [UserOut(**user, id=str(user["_id"])) for user in users]
+
+
 @router.get("/", response_model=List[UserOut])
 async def get_users(clerk_user: Dict[str, Any] = Depends(verify_clerk_auth), skip: int = 0, limit: int = 100):
     """

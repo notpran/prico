@@ -107,6 +107,20 @@ async def delete_user(user_id: str) -> bool:
     return result.deleted_count > 0
 
 
+async def search_users(query: str, limit: int = 10) -> List[Dict[str, Any]]:
+    """
+    Search users by username or display name
+    """
+    users_collection = await get_collection("users")
+    users = await users_collection.find({
+        "$or": [
+            {"username": {"$regex": query, "$options": "i"}},
+            {"display_name": {"$regex": query, "$options": "i"}}
+        ]
+    }).limit(limit).to_list(None)
+    return users
+
+
 async def send_friend_request(user_id: str, friend_id: str) -> bool:
     """
     Send a friend request
