@@ -5,11 +5,18 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true
+});
 
 export const metadata: Metadata = {
   title: 'Prico - Code, Chat, Collaborate',
   description: 'A platform combining Discord, VSCode, and GitHub functionalities for coding and collaboration',
+  keywords: ['coding', 'collaboration', 'chat', 'github', 'vscode', 'discord'],
+  authors: [{ name: 'Prico Team' }],
+  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({
