@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.25.1",
+    "@hookform/resolvers": "^5.2.2",
     "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -30,6 +31,7 @@
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.63.0",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.7.2",
     "tailwind-merge": "^1.14.0",
