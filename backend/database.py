@@ -264,6 +264,56 @@ async def get_dm_messages(dm_id: str, limit: int = 50, skip: int = 0) -> List[Di
     return messages
 
 
+async def get_message_by_id(message_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Get message by ID
+    """
+    messages_collection = await get_collection("messages")
+    message = await messages_collection.find_one({"_id": ObjectId(message_id)})
+    return message
+
+
+# DM operations
+async def create_dm(dm_data: Dict[str, Any]) -> str:
+    """
+    Create a new DM
+    """
+    dms_collection = await get_collection("dms")
+    result = await dms_collection.insert_one(dm_data)
+    return str(result.inserted_id)
+
+
+async def get_dm_by_id(dm_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Get DM by ID
+    """
+    dms_collection = await get_collection("dms")
+    dm = await dms_collection.find_one({"_id": ObjectId(dm_id)})
+    return dm
+
+
+async def get_dm_by_participants(participant_ids: List[ObjectId]) -> Optional[Dict[str, Any]]:
+    """
+    Get DM by participants
+    """
+    dms_collection = await get_collection("dms")
+    dm = await dms_collection.find_one({
+        "participants": {"$all": participant_ids, "$size": len(participant_ids)}
+    })
+    return dm
+
+
+async def get_user_dms(user_id: ObjectId) -> List[Dict[str, Any]]:
+    """
+    Get all DMs for a user
+    """
+    dms_collection = await get_collection("dms")
+    dms = await dms_collection.find(
+        {"participants": user_id}
+    ).sort("updated_at", -1).to_list(None)
+    return dms
+
+
 # Project operations
 async def create_project(project_data: Dict[str, Any]) -> str:
     """
