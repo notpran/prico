@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 
 # Import routers
-from routers import users, communities, chat, projects, notifications, rtc, editor, execute, auth
+from routers import users, communities, chat, projects, notifications, rtc, editor, execute, auth, messages
 
 # Load environment variables
 load_dotenv()
@@ -61,6 +61,7 @@ app.include_router(rtc.router)
 app.include_router(editor.router)
 app.include_router(execute.router)
 app.include_router(auth.router)
+app.include_router(messages.router)
 
 # Base route
 @app.get("/")
