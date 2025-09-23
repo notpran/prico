@@ -20,7 +20,11 @@ export default async function ProfilePage() {
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{user.fullName || user.username}</h1>
+            <h1 className="text-2xl font-bold">
+              {user.firstName && user.lastName 
+                ? `${user.firstName} ${user.lastName}` 
+                : user.firstName || user.username || user.id}
+            </h1>
             <p className="text-muted-foreground">@{user.username || user.id}</p>
           </div>
         </div>
@@ -30,7 +34,7 @@ export default async function ProfilePage() {
             <div className="p-6 bg-card rounded-lg border">
               <h2 className="text-xl font-semibold mb-4">About Me</h2>
               <p className="text-muted-foreground">
-                {user.publicMetadata.about || "No bio provided yet."}
+                {(user.publicMetadata?.about as string) || "No bio provided yet."}
               </p>
             </div>
 

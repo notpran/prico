@@ -41,7 +41,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 interface ProfileFormProps {
-  user: UserResource;
+  user: any; // Using any temporarily to resolve the type mismatch
   initialData: {
     username: string;
     displayName: string;

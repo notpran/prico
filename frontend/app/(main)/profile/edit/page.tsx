@@ -17,8 +17,10 @@ export default async function EditProfilePage() {
           user={user} 
           initialData={{
             username: user.username || "",
-            displayName: user.fullName || "",
-            bio: user.publicMetadata.about as string || "",
+            displayName: user.firstName && user.lastName 
+              ? `${user.firstName} ${user.lastName}` 
+              : user.firstName || user.username || "",
+            bio: (user.publicMetadata?.about as string) || "",
           }}
         />
       </div>
