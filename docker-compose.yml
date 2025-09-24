@@ -1,19 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB service
-  mongodb:
-    image: mongo:latest
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-admin}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-password}
-    networks:
-      - prico-network
 
   # Backend service
   backend:
@@ -23,11 +10,9 @@ services:
     restart: always
     ports:
       - "8000:8000"
-    depends_on:
-      - mongodb
+    # Uses external MongoDB (Atlas); no local dependency.
     environment:
-      - MONGODB_URL=mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/
-      - DB_NAME=prico_db
+      - MONGODB_URL=${MONGODB_URL}
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
     volumes:
       - ./backend:/app
@@ -56,6 +41,3 @@ services:
 networks:
   prico-network:
     driver: bridge
-
-volumes:
-  mongodb_data:
