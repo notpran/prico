@@ -31,6 +31,7 @@ export const api = {
     ensureDm: (userId: string) => request(`/messages/dm/${userId}`, { method: 'POST' }),
     listConversations: () => request('/messages/conversations'),
     listMessages: (conversationId: string) => request(`/messages/${conversationId}`),
-    send: (conversationId: string, content: string) => request(`/messages/${conversationId}`, { method: 'POST', body: JSON.stringify({ content }) })
+    send: (conversationId: string, content: string) => request(`/messages/${conversationId}`, { method: 'POST', body: JSON.stringify({ content }) }),
+    markRead: (conversationId: string) => request(`/messages/${conversationId}/read`, { method: 'POST' })
   }
 };
