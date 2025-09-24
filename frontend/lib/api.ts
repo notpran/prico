@@ -25,7 +25,8 @@ export const api = {
     decline: (userId: string) => request(`/friends/decline/${userId}`, { method: 'POST' }),
   },
   users: {
-    search: (q: string) => request(`/users/search?q=${encodeURIComponent(q)}`)
+    search: (q: string) => request(`/users/search?q=${encodeURIComponent(q)}`),
+    bulkByClerk: (ids: string[]) => request(`/users/bulk/by-clerk?ids=${encodeURIComponent(ids.join(','))}`)
   },
   messages: {
     ensureDm: (userId: string) => request(`/messages/dm/${userId}`, { method: 'POST' }),

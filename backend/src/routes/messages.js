@@ -33,8 +33,39 @@ router.post('/dm/:userId', requireAuth, async (req, res) => {
 // List conversations for current user
 router.get('/conversations', requireAuth, async (req, res) => {
   const me = req.auth.userId;
-  const list = await Conversation.find({ participant_ids: me }).sort({ last_message_at: -1 }).limit(50);
-  res.json(list);
+  const convos = await Conversation.find({ participant_ids: me }).sort({ last_message_at: -1 }).limit(50);
+  const convoIds = convos.map(c => c._id);
+  const lastMessages = await Message.aggregate([
+    { $match: { conversation_id: { $in: convoIds } } },
+    { $sort: { created_at: -1 } },
+    { $group: { _id: '$conversation_id', last: { $first: '$$ROOT' } } }
+  ]);
+  const lastMap = new Map(lastMessages.map(m => [String(m._id), m.last]));
+  // Compute unread counts (messages newer than read_markers[me])
+  const enriched = [];
+  for (const c of convos) {
+    const lastMsg = lastMap.get(String(c._id));
+    let unread = 0;
+    if (lastMsg) {
+      const readAt = c.read_markers?.get ? c.read_markers.get(me) : c.read_markers?.[me];
+      if (!readAt) {
+        // count all messages
+        unread = await Message.countDocuments({ conversation_id: c._id });
+      } else {
+        unread = await Message.countDocuments({ conversation_id: c._id, created_at: { $gt: readAt } });
+      }
+    }
+    enriched.push({
+      _id: c._id,
+      participant_ids: c.participant_ids,
+      type: c.type,
+      last_message_at: c.last_message_at,
+      read_markers: Object.fromEntries(c.read_markers || []),
+      last_message: lastMsg || null,
+      unread
+    });
+  }
+  res.json(enriched);
 });
 
 // List messages in a conversation

@@ -33,6 +33,16 @@ router.get('/search', async (req, res) => {
   res.json(users);
 });
 
+// Bulk lookup by clerk ids: /users/bulk/by-clerk?ids=a,b,c
+router.get('/bulk/by-clerk', async (req, res) => {
+  const idsParam = (req.query.ids || '').trim();
+  if (!idsParam) return res.json([]);
+  const ids = idsParam.split(',').map(s => s.trim()).filter(Boolean);
+  if (ids.length === 0) return res.json([]);
+  const users = await User.find({ clerk_id: { $in: ids } }).select('clerk_id username full_name avatar_url');
+  res.json(users);
+});
+
 // Search users (path param variant) - kept for backwards compatibility
 router.get('/search/:q', async (req, res) => {
   const q = req.params.q;
