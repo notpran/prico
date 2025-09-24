@@ -1,8 +1,18 @@
+from typing import List, Optional, Dict, Any
+async def upsert_user_by_clerk_id(db, clerk_id: str, user_data: Dict[str, Any]) -> None:
+    users_collection = db["users"]
+    await users_collection.update_one(
+        {"clerk_id": clerk_id},
+        {"$set": user_data},
+        upsert=True
+    )
+"""
+Database utility functions for Prico
+"""
 """
 Database utility functions for Prico
 """
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from typing import List, Optional, Dict, Any
 from bson import ObjectId
 import os
 from dotenv import load_dotenv

@@ -3,7 +3,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { Home, Users, FolderGit2, Bell } from "lucide-react";
+import { Home, Users, FolderGit2, Bell, MessageSquare } from "lucide-react";
 
 export default async function MainLayout({
   children,
@@ -32,6 +32,12 @@ export default async function MainLayout({
           <Users className="h-5 w-5" />
         </Link>
         <Link
+          href="/communities"
+          className="flex h-[48px] w-[48px] items-center justify-center rounded-[24px] bg-muted text-muted-foreground transition hover:bg-muted/80"
+        >
+          <MessageSquare className="h-5 w-5" />
+        </Link>
+        <Link
           href="/projects"
           className="flex h-[48px] w-[48px] items-center justify-center rounded-[24px] bg-muted text-muted-foreground transition hover:bg-muted/80"
         >
@@ -46,7 +52,7 @@ export default async function MainLayout({
         <div className="mt-auto flex flex-col gap-4">
           <ModeToggle />
           <UserButton
-            afterSignOutUrl="/"
+            afterSignOutUrl="/?signed_out=true"
             appearance={{
               elements: {
                 userButtonAvatarBox: "h-[48px] w-[48px]",

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Disabled - requires critters package
     optimizePackageImports: ['@clerk/nextjs', 'lucide-react'],
   },
   compiler: {
