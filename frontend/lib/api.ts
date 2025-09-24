@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function request(path: string, options: RequestInit = {}) {
   const { getToken } = auth();
