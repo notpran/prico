@@ -34,6 +34,9 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 app.set('wss', wss);
 const presence = new Map(); // userId -> { lastSeen, sockets: Set }
+// Simple in-memory cache for conversation participants to scope typing events
+const conversationCache = new Map(); // convoId -> { participants: string[], expires: number }
+const CONVO_CACHE_TTL_MS = 60_000;
 
 // Auth on connect: supports ?token= or Authorization header forwarded by proxy
 wss.on('connection', async (socket, req) => {
@@ -54,14 +57,28 @@ wss.on('connection', async (socket, req) => {
     presence.get(socket.userId).sockets.add(socket);
     presence.get(socket.userId).lastSeen = Date.now();
     socket.send(JSON.stringify({ type: 'hello', userId: socket.userId, time: Date.now() }));
-    socket.on('message', (data) => {
+    socket.on('message', async (data) => {
       let msg;
       try { msg = JSON.parse(data.toString()); } catch { return; }
       if (msg.type === 'ping') socket.send(JSON.stringify({ type: 'pong', t: Date.now() }));
       if (msg.type === 'typing' && msg.conversation_id) {
-        // Broadcast typing to other participants (simple fan-out)
-        const out = JSON.stringify({ type: 'typing', conversation_id: msg.conversation_id, user_id: socket.userId, at: Date.now() });
-        wss.clients.forEach(c => { if (c !== socket && c.readyState === 1) c.send(out); });
+        const convoId = msg.conversation_id;
+        const now = Date.now();
+        let cached = conversationCache.get(convoId);
+        if (!cached || cached.expires < now) {
+          try {
+            const { Conversation } = await import('./models/Conversation.js');
+            const convo = await Conversation.findById(convoId).select('participant_ids');
+            if (!convo) return; // invalid conversation
+            cached = { participants: convo.participant_ids, expires: now + CONVO_CACHE_TTL_MS };
+            conversationCache.set(convoId, cached);
+          } catch {
+            return;
+          }
+        }
+        if (!cached.participants.includes(socket.userId)) return; // sender not in convo
+        const out = JSON.stringify({ type: 'typing', conversation_id: convoId, user_id: socket.userId, at: now });
+        wss.clients.forEach(c => { if (c !== socket && c.readyState === 1 && cached.participants.includes(c.userId)) c.send(out); });
       }
     });
     socket.on('close', () => {
@@ -84,6 +101,27 @@ wss.on('connection', async (socket, req) => {
     socket.close();
   }
 });
+
+// Heartbeat: periodically broadcast presence for connected users & purge stale caches
+setInterval(() => {
+  const now = Date.now();
+  // Cleanup conversation cache
+  for (const [k, v] of conversationCache.entries()) {
+    if (v.expires < now) conversationCache.delete(k);
+  }
+  // Broadcast online heartbeat (optional) so clients can update last seen
+  const payloads = [];
+  for (const [userId, entry] of presence.entries()) {
+    if (entry.sockets.size > 0) {
+      payloads.push(JSON.stringify({ type: 'presence', user_id: userId, status: 'online', at: now }));
+    }
+  }
+  if (payloads.length) {
+    wss.clients.forEach(c => {
+      if (c.readyState === 1) payloads.forEach(p => c.send(p));
+    });
+  }
+}, 30_000);
 
 server.listen(PORT, () => console.log(`[Server] Listening on ${PORT} (initializing DB...)`));
 connectDB();

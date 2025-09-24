@@ -12,7 +12,7 @@ export default function DmClient({ conversation, initialMessages }: { conversati
   const [presence, setPresence] = useState<Record<string, string>>({});
   const [nameMap, setNameMap] = useState<Record<string, string>>({});
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const wsRef = useRealtime({
+  const { wsRef, send: wsSend } = useRealtime({
     onMessage: (evt) => {
       if (evt.type === 'message.new' && evt.conversation_id === String(conversation._id)) {
         setMessages(m => [...m, evt.message]);
@@ -48,15 +48,23 @@ export default function DmClient({ conversation, initialMessages }: { conversati
     api.messages.markRead(conversation._id).catch(() => {});
   }, [conversation._id]);
 
-  // Fetch participant usernames (naive: search by id pattern) -- placeholder improvement required
+  // Fetch participant usernames via bulk clerk id lookup
   useEffect(() => {
-    const others = conversation.participant_ids || [];
+    const ids: string[] = conversation.participant_ids || [];
     (async () => {
-      const map: Record<string, string> = {};
-      for (const id of others) {
-        map[id] = id; // fallback; real implementation would query user detail endpoint
+      if (!ids.length) return;
+      try {
+        const users = await api.users.bulkByClerk(ids);
+        const map: Record<string, string> = {};
+        users.forEach((u: any) => { map[u.clerk_id] = u.username || u.full_name || u.clerk_id; });
+        // fallback for any missing
+        ids.forEach(id => { if (!map[id]) map[id] = id; });
+        setNameMap(map);
+      } catch {
+        const map: Record<string, string> = {};
+        ids.forEach(id => { map[id] = id; });
+        setNameMap(map);
       }
-      setNameMap(map);
     })();
   }, [conversation.participant_ids]);
 
@@ -79,11 +87,9 @@ export default function DmClient({ conversation, initialMessages }: { conversati
 
   // Typing events
   useEffect(() => {
-    if (!wsRef.current) return;
     if (!input) return; // only when non-empty
-    const ws = wsRef.current;
-    ws.send(JSON.stringify({ type: 'typing', conversation_id: String(conversation._id) }));
-  }, [input, conversation._id, wsRef]);
+    wsSend({ type: 'typing', conversation_id: String(conversation._id) });
+  }, [input, conversation._id, wsSend]);
 
   // Mark read when window gains focus or new messages arrive
   useEffect(() => {
@@ -104,7 +110,11 @@ export default function DmClient({ conversation, initialMessages }: { conversati
             <span>{m.content}</span>
           </div>
         ))}
-        {Object.keys(typingUsers).length > 0 && <div className="text-xs text-muted-foreground">Someone is typing…</div>}
+        {Object.keys(typingUsers).length > 0 && (
+          <div className="text-xs text-muted-foreground">
+            {Object.keys(typingUsers).map(id => nameMap[id] || id).join(', ')} {Object.keys(typingUsers).length === 1 ? 'is' : 'are'} typing…
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
       <div className="flex gap-2">
