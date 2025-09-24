@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 
 # Import routers
-from routers import users, communities, chat, projects, notifications, rtc, editor, execute, auth, messages
+from routers import users_router, communities_router, chat_router, projects_router, notifications_router, rtc_router, editor_router, execute_router, auth_router, messages_router, sync_router
 
 # Load environment variables
 load_dotenv()
@@ -31,7 +31,12 @@ origins = [
     "http://127.0.0.1:3000",
     "http://frontend:3000",
     "https://prico.vercel.app",  # Add your production domain if any
+    "https://psychic-space-doodle-7vp4j45qvjw63wxx7-3000.app.github.dev",  # Codespaces frontend
 ]
+
+# For development in Codespaces, allow all origins
+if os.getenv("CODESPACES", "false").lower() == "true":
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,16 +57,17 @@ async def shutdown_db_client():
     app.mongodb_client.close()
 
 # Include routers
-app.include_router(users.router)
-app.include_router(communities.router)
-app.include_router(chat.router)
-app.include_router(projects.router)
-app.include_router(notifications.router)
-app.include_router(rtc.router)
-app.include_router(editor.router)
-app.include_router(execute.router)
-app.include_router(auth.router)
-app.include_router(messages.router)
+app.include_router(users_router)
+app.include_router(communities_router)
+app.include_router(chat_router)
+app.include_router(projects_router)
+app.include_router(notifications_router)
+app.include_router(rtc_router)
+app.include_router(editor_router)
+app.include_router(execute_router)
+app.include_router(auth_router)
+app.include_router(messages_router)
+app.include_router(sync_router)
 
 # Base route
 @app.get("/")

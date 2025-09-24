@@ -1,16 +1,8 @@
-FROM python:3.9-slim
-
+FROM node:20-alpine
 WORKDIR /app
-
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Expose the port
+COPY package*.json ./
+RUN npm install --production
+COPY src ./src
+ENV PORT=8000
 EXPOSE 8000
-
-# Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["node", "src/server.js"]
