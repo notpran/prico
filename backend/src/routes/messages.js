@@ -48,6 +48,20 @@ router.get('/:conversationId', requireAuth, async (req, res) => {
   res.json(msgs.reverse());
 });
 
+// Mark conversation read (updates read_markers[userId])
+router.post('/:conversationId/read', requireAuth, async (req, res) => {
+  const me = req.auth.userId;
+  const convoId = req.params.conversationId;
+  const convo = await Conversation.findById(convoId);
+  if (!convo || !convo.participant_ids.includes(me)) return res.status(404).json({ error: 'Not found' });
+  await Conversation.updateOne({ _id: convoId }, { $set: { [`read_markers.${me}`]: new Date(), updated_at: new Date() } });
+  if (req.app.get('wss')) {
+    const payload = JSON.stringify({ type: 'conversation.read', conversation_id: convoId, user_id: me, at: Date.now() });
+    req.app.get('wss').clients.forEach(c => { if (c.readyState === 1 && convo.participant_ids.includes(c.userId)) c.send(payload); });
+  }
+  res.json({ ok: true });
+});
+
 // Send message
 router.post('/:conversationId', requireAuth, async (req, res) => {
   const me = req.auth.userId;

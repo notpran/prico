@@ -5,7 +5,8 @@ const ConversationSchema = new mongoose.Schema({
   type: { type: String, enum: ['dm', 'group'], default: 'dm' },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  last_message_at: { type: Date }
+  last_message_at: { type: Date },
+  read_markers: { type: Map, of: Date, default: {} }
 }, { collection: 'conversations' });
 
 ConversationSchema.index({ participant_ids: 1 });

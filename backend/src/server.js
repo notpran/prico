@@ -33,6 +33,7 @@ app.get('/debug/db', requireAuth, (_req, res) => {
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 app.set('wss', wss);
+const presence = new Map(); // userId -> { lastSeen, sockets: Set }
 
 // Auth on connect: supports ?token= or Authorization header forwarded by proxy
 wss.on('connection', async (socket, req) => {
@@ -49,12 +50,35 @@ wss.on('connection', async (socket, req) => {
     }
     const payload = await verifyClerkToken(token);
     socket.userId = payload.sub;
+    if (!presence.has(socket.userId)) presence.set(socket.userId, { lastSeen: Date.now(), sockets: new Set() });
+    presence.get(socket.userId).sockets.add(socket);
+    presence.get(socket.userId).lastSeen = Date.now();
     socket.send(JSON.stringify({ type: 'hello', userId: socket.userId, time: Date.now() }));
     socket.on('message', (data) => {
       let msg;
       try { msg = JSON.parse(data.toString()); } catch { return; }
       if (msg.type === 'ping') socket.send(JSON.stringify({ type: 'pong', t: Date.now() }));
+      if (msg.type === 'typing' && msg.conversation_id) {
+        // Broadcast typing to other participants (simple fan-out)
+        const out = JSON.stringify({ type: 'typing', conversation_id: msg.conversation_id, user_id: socket.userId, at: Date.now() });
+        wss.clients.forEach(c => { if (c !== socket && c.readyState === 1) c.send(out); });
+      }
     });
+    socket.on('close', () => {
+      const entry = presence.get(socket.userId);
+      if (entry) {
+        entry.sockets.delete(socket);
+        entry.lastSeen = Date.now();
+        if (entry.sockets.size === 0) {
+          // Broadcast offline
+          const off = JSON.stringify({ type: 'presence', user_id: socket.userId, status: 'offline', at: Date.now() });
+            wss.clients.forEach(c => { if (c.readyState === 1) c.send(off); });
+        }
+      }
+    });
+    // Broadcast online presence
+    const on = JSON.stringify({ type: 'presence', user_id: socket.userId, status: 'online', at: Date.now() });
+    wss.clients.forEach(c => { if (c.readyState === 1) c.send(on); });
   } catch (e) {
     socket.send(JSON.stringify({ type: 'error', error: 'Auth failed', detail: e.message }));
     socket.close();
