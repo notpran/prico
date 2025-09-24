@@ -4,6 +4,7 @@ import { CLERK_SECRET_KEY } from '../config.js';
 import { User } from '../models/User.js';
 import { SyncState } from '../models/SyncState.js';
 import mongoose from 'mongoose';
+
 import { waitForDb, isDbConnected, ensureDbConnected } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 
