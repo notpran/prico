@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/(auth)/sign-in/page": "app/(auth)/sign-in/page.js",
+  "/(auth)/sign-up/page": "app/(auth)/sign-up/page.js",
+  "/communities/page": "app/communities/page.js",
+  "/community/[id]/page": "app/community/[id]/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/notifications/page": "app/notifications/page.js",
+  "/page": "app/page.js",
+  "/profile/[username]/page": "app/profile/[username]/page.js",
+  "/projects/[id]/page": "app/projects/[id]/page.js",
+  "/projects/page": "app/projects/page.js"
+}

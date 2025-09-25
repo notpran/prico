@@ -1,0 +1,23 @@
+{
+  "name": "prico-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:shared": "pnpm --filter @prico/shared build",
+    "dev:backend": "pnpm --filter prico-backend dev",
+    "dev:frontend": "pnpm --filter prico-frontend dev",
+    "dev": "pnpm build:shared && concurrently -n backend,frontend -c blue,green \"pnpm dev:backend\" \"pnpm dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "tailwindcss": "3.4.13"
+    }
+  },
+  "packageManager": "pnpm@9.0.0"
+}
